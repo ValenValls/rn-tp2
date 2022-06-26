@@ -29,6 +29,7 @@ class Hebbiano:
                 Z = np.dot( Y, self.weights.T)
                 dW = np.outer( x-Z, Y)                
                 self.weights+= learning_rate * dW
+            t += 1
 
     #Entrenamiento del modelo con el algoritmo de Sanger
 
@@ -43,7 +44,8 @@ class Hebbiano:
                 D = np.triu( np.ones((self.m,self.m)))
                 Z = np.dot( self.weights, Y.T*D)
                 dW = (x.T - Z) * Y
-                self.weights+= learning_rate * dW   
+                self.weights+= learning_rate * dW  
+            t += 1 
                        
 
 
