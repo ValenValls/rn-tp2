@@ -1,0 +1,9 @@
+/venv/
+.idea
+hebbiano/__pycache__/*
+utils/__pycache__/*
+utils/.ipynb_checkpoints
+*.pyc
+*.png
+*.db
+*.txt
