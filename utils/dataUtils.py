@@ -13,7 +13,7 @@ def get_data(archivo_data):
 
 
 
-#Hay que normalizar los datos
+#Hay que normalizar los datos para el aprendizaje hebbiano
 def normalize(X):
     mean = X.mean(0)
     std = X.std(0) 

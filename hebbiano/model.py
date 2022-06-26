@@ -16,6 +16,9 @@ class Hebbiano:
         return np.sum(np.abs(np.dot( self.weights.T, self.weights) - np.identity(self.m) ))/2
 
     #Entrenamiento del modelo con el algoritmo de Oja
+    
+    #Los pesos se van al infinito, en los ejercicios de la practica me dejo de pasar cuando normalice los datos
+    #Puede que el error venga del lado normalizacion
     def trainOja(self,X,error_limit=0.01, limit=100):
         t = 1
         
@@ -28,6 +31,8 @@ class Hebbiano:
                 self.weights+= learning_rate * dW
 
     #Entrenamiento del modelo con el algoritmo de Sanger
+
+    #Hay error con la resta de x.T y Z, me parece que hay q meter reshape en algun lado 
     def trainSanger(self,X,error_limit=0.01, limit=5):
         t = 1        
         while t<limit and (self.ortogonalidad() > error_limit):
