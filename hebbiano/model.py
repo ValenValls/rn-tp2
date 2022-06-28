@@ -7,7 +7,7 @@ class Hebbiano:
 
 
     def __init__(self, N,M):        
-        self.weights = np.random.normal( 0, 0.1, (N,M))          
+        self.weights = np.random.normal( 0, 0.1, (N,M))
         self.m = M
         self.n = N  
 
@@ -21,33 +21,41 @@ class Hebbiano:
     #Puede que el error venga del lado normalizacion
     def trainOja(self,X,error_limit=0.01, limit=100):
         t = 1
-        
+
         while t < limit and (self.ortogonalidad() > error_limit):
-            learning_rate = 1/t
+            #Con este lr adaptativo da overflow
+            #learning_rate = 1 / t
+            #Tal vez algo de este estilo?
+            #learning_rate = 0.0001/t
+            #Me hace ruido el overflow igual, despues reviso las cuentas
+            learning_rate = 0.0001
             for x in X:
+                #Las cuentas me coinciden con las que yo tenia
+                #Pero tuve que hacer este reshape porque x es un vector
+                x = x.reshape((1, -1))
                 Y = np.dot( x, self.weights)
                 Z = np.dot( Y, self.weights.T)
-                dW = np.outer( x-Z, Y)                
+                dW = np.outer( x-Z, Y)
                 self.weights+= learning_rate * dW
             t += 1
 
     #Entrenamiento del modelo con el algoritmo de Sanger
 
     #Hay error con la resta de x.T y Z, me parece que hay q meter reshape en algun lado 
-    def trainSanger(self,X,error_limit=0.01, limit=5):
+    def trainSanger(self,X,error_limit=0.01, limit=100):
         t = 1        
         while t<limit and (self.ortogonalidad() > error_limit):
-            learning_rate = 1/t
+            #learning_rate=1/t
+            learning_rate = 0.0001/t
+            #learning_rate = 0.0001
             for x in X:
-                
+                x = x.reshape((1, -1))
                 Y = np.dot( x, self.weights)
                 D = np.triu( np.ones((self.m,self.m)))
                 Z = np.dot( self.weights, Y.T*D)
                 dW = (x.T - Z) * Y
                 self.weights+= learning_rate * dW  
-            t += 1 
-                       
-
+            t += 1
 
 
     #Prediccion con el modelo entrenado
