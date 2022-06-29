@@ -38,10 +38,12 @@ class Hebbiano:
                 dW = np.outer( x-Z, Y)
                 self.weights+= learning_rate * dW
             t += 1
+        #La ortogonalidad me da cerca de 2 cuando sale, asi que claramente hay algo mal
+        #print(self.ortogonalidad())
 
     #Entrenamiento del modelo con el algoritmo de Sanger
 
-    #Hay error con la resta de x.T y Z, me parece que hay q meter reshape en algun lado 
+    #Hay error con la resta de x.T y Z, me parece que hay q meter reshape en algun lado, HECHO
     def trainSanger(self,X,error_limit=0.01, limit=100):
         t = 1        
         while t<limit and (self.ortogonalidad() > error_limit):
@@ -56,6 +58,8 @@ class Hebbiano:
                 dW = (x.T - Z) * Y
                 self.weights+= learning_rate * dW  
             t += 1
+        #La ortogonalidad de este dio cerca de 0.1 asi que esta bastante bien creo
+        #print(self.ortogonalidad())
 
 
     #Prediccion con el modelo entrenado
