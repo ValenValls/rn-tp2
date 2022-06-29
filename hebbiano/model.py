@@ -19,16 +19,17 @@ class Hebbiano:
     
     #Los pesos se van al infinito, en los ejercicios de la practica me dejo de pasar cuando normalice los datos
     #Puede que el error venga del lado normalizacion
+    #Con el limite de 100 a 1000 mejora bastante
     def trainOja(self,X,error_limit=0.01, limit=100):
         t = 1
 
         while t < limit and (self.ortogonalidad() > error_limit):
             #Con este lr adaptativo da overflow
             #learning_rate = 1 / t
-            #Tal vez algo de este estilo?
-            #learning_rate = 0.0001/t
+            #Anduvo bastante bien la ortogonalidad con este lr
+            learning_rate = 0.0001/t
             #Me hace ruido el overflow igual, despues reviso las cuentas
-            learning_rate = 0.0001
+            #learning_rate = 0.0001/t
             for x in X:
                 #Las cuentas me coinciden con las que yo tenia
                 #Pero tuve que hacer este reshape porque x es un vector
@@ -38,7 +39,6 @@ class Hebbiano:
                 dW = np.outer( x-Z, Y)
                 self.weights+= learning_rate * dW
             t += 1
-        #La ortogonalidad me da cerca de 2 cuando sale, asi que claramente hay algo mal
         #print(self.ortogonalidad())
 
     #Entrenamiento del modelo con el algoritmo de Sanger
@@ -56,7 +56,7 @@ class Hebbiano:
                 D = np.triu( np.ones((self.m,self.m)))
                 Z = np.dot( self.weights, Y.T*D)
                 dW = (x.T - Z) * Y
-                self.weights+= learning_rate * dW  
+                self.weights+= learning_rate * dW
             t += 1
         #La ortogonalidad de este dio cerca de 0.1 asi que esta bastante bien creo
         #print(self.ortogonalidad())
