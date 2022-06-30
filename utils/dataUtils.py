@@ -19,8 +19,8 @@ def normalize(X):
     std = X.std(0) 
     X = (X - mean) / np.square(std)
     return X
-
-def plot3D(X,Y):
+#Agrego title para diferenciar los graficos
+def plot3D(X,Y,title):
     Y = Y.reshape((-1, 1))
 
     #Esto define distintos angulos desde el que se toman los graficos en R3
@@ -36,7 +36,7 @@ def plot3D(X,Y):
             ax.set_xlabel('x')
             ax.set_ylabel('y')
             ax.set_zlabel('z')
-        plt.suptitle('Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3))
+        plt.suptitle(title + ': '+ 'Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3))
         plt.show()
 
 
