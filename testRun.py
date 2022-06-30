@@ -16,7 +16,7 @@ predictedSanger = hebbianoSanger.predict(X)
 #print(predictedOja)
 #print(predictedSanger)
 
-plot3D(predictedOja,Y)
-plot3D(predictedSanger,Y)
+plot3D(predictedOja,Y,"Oja")
+plot3D(predictedSanger,Y,"Sanger")
 
 
