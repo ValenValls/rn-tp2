@@ -14,7 +14,7 @@ for epochs, i in zip([1, 4, 5, 10], range(0,4)):
     total_epochs += epochs
     SOM = model.train(train_data, epochs=epochs)
 
-udm = u_matrix(SOM)
+udm = u_matrix(SOM,m)
 
 plotSOM(udm, m)
 plt.show()

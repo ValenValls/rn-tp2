@@ -13,6 +13,26 @@ def get_data(archivo_data):
 
     return X, Y
 
+#Viendo la parte del enunciado de mapeo de caracteristicas, ahí habla de ver diferencia de datos de entrenamiendo y validacion
+# Si se le da X,Y obtenidos de get_data, separa aleatoriamente en train y validation
+#   Por ahora lo dejo así, pero hay que tener en cuenta que con la separacion aleatoria se pierde la uniformidad que tenía el dataset
+#   todo modificar o crear otra separacion uniforme, puede servir comparar el entrenamiento uniforme vs no uniforme
+def separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
+    total_regs = X.shape[0] if total_regs == 0 else total_regs
+    X = X[:total_regs, : ]
+    Y = Y[:total_regs]
+    #Tomo el porcentaje de datos de entrenamiento
+    end_train = total_regs - int(validation_size * total_regs)
+    #Tomo los datos de entrenamiento de manera aleatoria
+    indexes = np.random.permutation(total_regs)
+    trn = indexes[:end_train]  
+    val = indexes[end_train:]
+    #Separo
+    X_train = X[trn, :]
+    Y_train = Y[trn]
+    X_validation = X[val, :]
+    Y_validation = Y[val]
+    return X_train, Y_train, X_validation, Y_validation
 
 
 #Hay que normalizar los datos para el aprendizaje hebbiano
