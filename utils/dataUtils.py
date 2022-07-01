@@ -14,10 +14,10 @@ def get_data(archivo_data):
     return X, Y
 
 #Viendo la parte del enunciado de mapeo de caracteristicas, ahí habla de ver diferencia de datos de entrenamiendo y validacion
-# Si se le da X,Y obtenidos de get_data, separa aleatoriamente en train y validation
-#   Por ahora lo dejo así, pero hay que tener en cuenta que con la separacion aleatoria se pierde la uniformidad que tenía el dataset
-#   todo modificar o crear otra separacion uniforme, puede servir comparar el entrenamiento uniforme vs no uniforme
-def separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
+# Si se le da X,Y obtenidos de get_data, separa aleatoriamente en xtrain,ytrain y xvalidation,yvalidation
+#   Dejo la version de separacion aleatoria que puede perder la uniformidad que tenía el dataset
+#   Podría llegar a servir para ver la diferencia cuando se entrena con y sin uniformidad de datos?
+def random_separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
     total_regs = X.shape[0] if total_regs == 0 else total_regs
     X = X[:total_regs, : ]
     Y = Y[:total_regs]
@@ -34,6 +34,33 @@ def separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
     Y_validation = Y[val]
     return X_train, Y_train, X_validation, Y_validation
 
+#Haciendo esto note que no hay exactamente 100 instancias de cada categoria en el dataset, esta separacion igualmente...
+#   mantiene misma proporcion que el dataset original
+def proportional_separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
+    total_regs = X.shape[0] if total_regs == 0 else total_regs
+    X = X[:total_regs, : ]
+    Y = Y[:total_regs]  
+    #Separo los indices por categoria    
+    indexes_by_cat = [[],[],[],[],[],[],[],[],[]] 
+    for idy in range(0,len(Y)):
+        for c in range(1,10):            
+            if(Y[idy] == c):                
+                (indexes_by_cat[c-1]).append(idy)    
+    #Separo los indices entre entrenamiento y validacion       
+    train_by_cat = []
+    validate_by_cat = []
+    for c in range(1,10):       
+            category_regs = len(indexes_by_cat[c-1])            
+            end_train = category_regs - int(validation_size * category_regs)            
+            np.random.shuffle(indexes_by_cat[c-1])
+            train_by_cat += indexes_by_cat[c-1][:end_train]
+            validate_by_cat += indexes_by_cat[c-1][end_train:]        
+    #Separo el data set con los indices
+    X_train = X[train_by_cat, :]
+    Y_train = Y[train_by_cat]
+    X_validation = X[validate_by_cat, :]
+    Y_validation = Y[validate_by_cat]
+    return X_train, Y_train, X_validation, Y_validation
 
 #Hay que normalizar los datos para el aprendizaje hebbiano
 def normalize(X):
