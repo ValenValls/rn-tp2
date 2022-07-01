@@ -6,13 +6,15 @@ from matplotlib import pyplot as pl
 class Hebbiano:
 
 
-    def __init__(self, N,M):        
+    def __init__(self, N,M, reglas=None):
         self.weights = np.random.normal( 0, 0.1, (N,M))
         #todo no se si aporta en algo pero dejo por aca. Lei en general que los pesos se inicializaban con zero...
         # esto no funciona si lo inicializo con cero. Pero podriamos con numeros muy chicos como hicimos para
         # el perceptron self.weights = np.random.randn(N,M) * 0.0001 No se si cambia significativamente.
         self.m = M
-        self.n = N  
+        self.n = N
+        self.reglas = reglas
+
 
     #Para ver que tan cerca se esta de converger y decidir si parar, utilizamos la ortogonalidad de los pesos
     def ortogonalidad(self):
@@ -71,6 +73,12 @@ class Hebbiano:
             t += 1
         #La ortogonalidad de este dio cerca de 0.1 asi que esta bastante bien creo
         #print(self.ortogonalidad())
+
+    def train(self, X, error_limit=0.01, limit=100):
+        if self.reglas == 'oja':
+            self.trainOja(X, error_limit, limit)
+        else:
+            self.trainSanger(X, error_limit, limit)
 
 
     #Prediccion con el modelo entrenado

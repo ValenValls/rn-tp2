@@ -3,7 +3,7 @@ import numpy as np
 
 class SOM:
 
-    def __init__(self, m, n):
+    def __init__(self, n, m):
         ## n es la cantidad de palabras, m el tamaño de la matriz de pesos de cada celula.
         rand = np.random.RandomState(0)
         self.SOM = rand.randn(m, m, n) * 0.01
@@ -34,8 +34,8 @@ class SOM:
 
     # Main routine for training an SOM. It requires an initialized SOM grid
     # or a partially trained grid as parameter
-    def train_SOM(self, train_data, learn_rate=.1, radius_sq=1,
-                  lr_decay=.1, radius_decay=.1, epochs=10):
+    def train(self, train_data, learn_rate=.1, radius_sq=1,
+              lr_decay=.1, radius_decay=.1, epochs=10):
         learn_rate_0 = learn_rate
         radius_0 = radius_sq
         for epoch in np.arange(0, epochs):
