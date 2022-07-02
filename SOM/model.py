@@ -74,3 +74,20 @@ class SOM:
             learn_rate = learn_rate_0 * np.exp(-epoch * lr_decay)
             radius_sq = radius_0 * np.exp(-epoch * radius_decay)
         return self.SOM
+
+    ## U-MATRIX
+    def dist3(self, p1, p2):
+        """
+        Square of the Euclidean distance between points p1 and p2
+        in 3 dimensions.
+        """
+        return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2
+
+    def u_matrix(self):
+        udm = np.zeros((self.m - 2, self.m - 2))  # initiaize U-matrix with elements set to 0
+        SOM = self.SOM
+        for i in range(1, self.m - 1):  # loops over the neurons in the grid
+            for j in range(1, self.m - 1):
+                udm[i - 1][j - 1] = np.sqrt(self.dist3(SOM[i][j], SOM[i][j + 1]) + self.dist3(SOM[i][j], SOM[i][j - 1]) +
+                                            self.dist3(SOM[i][j], SOM[i + 1][j]) + self.dist3(SOM[i][j], SOM[i - 1][j]))
+        return udm

@@ -71,6 +71,7 @@ if __name__ == '__main__':
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
             #TODO hay que terminar el som para que esto pueda hacer algo
+            plotSOM(modelo.u_matrix(), modelo.m)  # el segundo dato es M
             plt.show()
             assert True == False, 'Falta implementar esto'
     else:
@@ -84,12 +85,15 @@ if __name__ == '__main__':
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
             modelo.train(X)
-            total_epochs = 0
-            for epochs, i in zip([1, 4, 5, 10], range(0, 4)):
-                total_epochs += epochs
-                SOM = modelo.train(X, epochs=epochs)
-            udm = u_matrix(SOM, run.args[1])
-            plotSOM(udm, run.args[1]) # el segundo dato es M
+            # TODO esto era para ir graficando valores intermedios. Creo que ya no es necesario.
+            # total_epochs = 0
+            # for epochs, i in zip([1, 4, 5, 10], range(0, 4)):
+            #     total_epochs += epochs
+            #     SOM = modelo.train(X, epochs=epochs)
+            ##TODO me parece que hice algo mal al pasar el grafico porque sale raro
+            # igual tampoco se que estamos graficando
+            # udm = u_matrix(SOM, run.args[1])
+            plotSOM(modelo.u_matrix(), modelo.m) # el segundo dato es M
             plt.show()
 
         if run.save:
