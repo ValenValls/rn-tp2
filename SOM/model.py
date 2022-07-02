@@ -1,5 +1,7 @@
 import numpy as np
-
+import math
+import matplotlib.pyplot as plt
+from matplotlib import cm
 
 class SOM:
 
@@ -9,7 +11,7 @@ class SOM:
         self.n = n
         self.m = m
         if n and m:
-            self.SOM = rand.randn(m, m, n) * 0.01
+            self.SOM = rand.randn(m, m, n) *0.1
 
     def export_model(self, filename):
         # El formato del archivo seria
@@ -60,10 +62,22 @@ class SOM:
 
     # Main routine for training an SOM. It requires an initialized SOM grid
     # or a partially trained grid as parameter
-    def train(self, train_data, learn_rate=.1, radius_sq=1,
-              lr_decay=.1, radius_decay=.1, epochs=10):
+    def train(self, train_data, learn_rate=.99, radius_sq=10,
+              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None):
         learn_rate_0 = learn_rate
         radius_0 = radius_sq
+        if graph:
+            scale = math.ceil(epochs/8)
+            to_graph = [0]
+            for i in range(0, 6):
+                to_graph.append(to_graph[i] + scale)
+            to_graph.append(epochs-1)
+            fig, ax = plt.subplots(
+                nrows=2, ncols=4, figsize=(15, 3.5),
+                subplot_kw=dict(xticks=[], yticks=[]))
+        else:
+            graph=[]
+
         for epoch in np.arange(0, epochs):
             np.random.shuffle(train_data)
             for train_ex in train_data:
@@ -73,6 +87,15 @@ class SOM:
             # Update learning rate and radius
             learn_rate = learn_rate_0 * np.exp(-epoch * lr_decay)
             radius_sq = radius_0 * np.exp(-epoch * radius_decay)
+            if epoch in to_graph:
+                idx = to_graph.index(epoch)
+                x = idx % 4
+                y = idx // 4
+                ax[y][x].imshow(self.categorize(train_data, Y), cmap='Pastel1')
+                ax[y][x].title.set_text('Epochs = ' + str(epoch))
+
+        if graph:
+            plt.show()
         return self.SOM
 
     ## U-MATRIX
