@@ -67,6 +67,7 @@ class SOM:
         learn_rate_0 = learn_rate
         radius_0 = radius_sq
         if graph:
+            X = train_data.copy()
             scale = math.ceil(epochs/8)
             to_graph = [0]
             for i in range(0, 6):
@@ -91,7 +92,7 @@ class SOM:
                 idx = to_graph.index(epoch)
                 x = idx % 4
                 y = idx // 4
-                ax[y][x].imshow(self.categorize(train_data, Y), cmap='Pastel1')
+                ax[y][x].imshow(self.categorize(X, Y), cmap='Pastel1')
                 ax[y][x].title.set_text('Epochs = ' + str(epoch))
 
         if graph:
