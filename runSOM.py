@@ -2,51 +2,46 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from SOM.model import SOM as SomModel
-from utils.dataUtils import get_data, plotSOM, plotSOMColorMap
+from hebbiano.model import Hebbiano
+from utils.dataUtils import get_data, plotSOM, plotSOMColorMap, normalize, proportional_separate_train_validation
 
 # Dimensions of the SOM grid
 m = 6
 train_data, Y = get_data("./data/tp2_training_dataset.csv")
 
+# TODO prueba pasando por hebb primero para reducir dimensionalidad
+# para usar cambiar train_data por X en la linea 10
+# X, _, _ = normalize(X)
+#
+# hebbianoOja = Hebbiano(850,9)
+# hebbianoOja.trainOja(X)
+# train_data = hebbianoOja.predict(X)
+
+X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(train_data,Y)
+
 total_epochs = 0
-model = SomModel(850, m)
-SOM = model.train(train_data, epochs=20, graph=True, Y=Y)
-# fig, ax = plt.subplots(
-#     nrows=2, ncols=4, figsize=(15, 3.5),
-#     subplot_kw=dict(xticks=[], yticks=[]))
-# for epochs, i in zip([1, 4, 5, 10, 2, 2, 2, 2], range(0,8)):
-#     total_epochs += epochs
-#     x= i % 4
-#     y = i // 4
-#     SOM = model.train(train_data, epochs=epochs)
-#     ax[y][x].imshow(model.categorize(train_data, Y), cmap='Pastel1')
-#     ax[y][x].title.set_text('Epochs = ' + str(total_epochs))
+model = SomModel(train_data.shape[1], m)
+SOM = model.train(X_train, learn_rate=.3, radius_sq=3, epochs=16, graph=True, Y=Y_train)
+
+fig = plt.figure(2)
+fig, ax = plt.subplots(
+    nrows=3, ncols=3, figsize=(15, 20),
+    subplot_kw=dict(xticks=[], yticks=[]))
+mat = model.map_per_cat(X_val,Y_val)
+for idx in range(0,9):
+    x = idx % 3
+    y = idx // 3
+    current_ax = ax[y][x]
+    model.plot_ax(mat[:,:,idx+1], current_ax, idx, cmap='gray_r', title='Categoria ', legend='#Docs')
+# model.plot_ax(,ax,epoch=20, title="Validation")
+fig.savefig('otraprueba.png')
+fig.show()
+
+
 
 # plt.show()
 
 # c= model.categorize(train_data, Y)
 # print(c)
 # plotSOMColorMap(c)
-#udm = u_matrix(SOM,m)
-
-# plotSOM(udm, m)
-#
-# tad = np.zeros((m, m))
-#
-# for i in range(m):
-#     for j in range(m):
-#         tad[i][j] = dist3(train_data[1], SOM[i][j])
-#
-# ind_m = np.argmin(tad)  # winner
-# in_x = ind_m // m
-# in_y = ind_m % m
-#
-# da = np.sqrt(tad[in_x][in_y])
-#
-# ax.plot([in_x], [in_y], [da], markerfacecolor='k', markeredgecolor='k', marker='o', markersize=5, alpha=0.6)
-# # ax.scatter3D(in_x, in_y, da, c='red')
-# plt.show()
-# print("Closest neuron grid indices: (", in_x, ",", in_y, ")")
-# print("Distance: ", np.round(da, 3))
-
 

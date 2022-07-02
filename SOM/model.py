@@ -2,6 +2,8 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import matplotlib.patches as mpatches
+
 
 class SOM:
 
@@ -63,7 +65,7 @@ class SOM:
     # Main routine for training an SOM. It requires an initialized SOM grid
     # or a partially trained grid as parameter
     def train(self, train_data, learn_rate=.99, radius_sq=10,
-              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None):
+              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None, fn='.png'):
         learn_rate_0 = learn_rate
         radius_0 = radius_sq
         if graph:
@@ -74,7 +76,7 @@ class SOM:
                 to_graph.append(to_graph[i] + scale)
             to_graph.append(epochs-1)
             fig, ax = plt.subplots(
-                nrows=2, ncols=4, figsize=(15, 3.5),
+                nrows=2, ncols=4, figsize=(15, 5),
                 subplot_kw=dict(xticks=[], yticks=[]))
         else:
             graph=[]
@@ -92,12 +94,40 @@ class SOM:
                 idx = to_graph.index(epoch)
                 x = idx % 4
                 y = idx // 4
-                ax[y][x].imshow(self.categorize(X, Y), cmap='Pastel1')
-                ax[y][x].title.set_text('Epochs = ' + str(epoch))
+                categorized = self.categorize(X, Y)
+                current_ax = ax[y][x]
+                self.plot_ax(categorized, current_ax, epoch)
 
         if graph:
-            plt.show()
+            fig.subplots_adjust(hspace=.3)
+            fig.suptitle(f"Mapeo de Características - lr: {learn_rate_0} - radio: {radius_0} ", fontsize=14)
+            fig.savefig(f"SOM_lr_{learn_rate_0}_radio_{radius_0}_epochs_{epochs}_{fn}")
+            fig.show()
+            # fig.close()
         return self.SOM
+
+    def plot_ax(self, categorized, current_ax, epoch, title='Epochs = ', cmap='Paired', legend='Categoria'):
+        im = current_ax.imshow(categorized, cmap=cmap)
+        title = f'{title} ' + str(epoch + 1)
+        current_ax.title.set_text(title)
+        values = np.unique(categorized.ravel())
+        colors = [im.cmap(im.norm(value)) for value in values]
+        patches = [mpatches.Patch(color=colors[i], label="{l}".format(l=values[i])) for i in
+                   range(len(values))]
+        # Major ticks
+        current_ax.set_xticks(np.arange(0, self.m, 1))
+        current_ax.set_yticks(np.arange(0, self.m, 1))
+        # Labels for major ticks
+        current_ax.set_xticklabels(np.arange(1, self.m + 1, 1))
+        current_ax.set_yticklabels(np.arange(1, self.m + 1, 1))
+        # Minor ticks
+        current_ax.set_xticks(np.arange(-.5, self.m, 1), minor=True)
+        current_ax.set_yticks(np.arange(-.5, self.m, 1), minor=True)
+        # Gridlines based on minor ticks
+        current_ax.grid(which='minor', color='black', linestyle='--', linewidth=1)
+        current_ax.legend(title=legend, handles=patches, bbox_to_anchor=(1.05, .95), loc=2,
+                          borderaxespad=0., labelspacing=0, handleheight=0.5,
+                          fontsize='x-small')
 
     ## U-MATRIX
     def dist3(self, p1, p2):
@@ -125,9 +155,13 @@ class SOM:
         #En cada posicion i,j,k de cat voy a contar cuantos documentos entran en la posicion i,j
         #del SOM de la categoria k+1
         #La tercer coordenada es 10 ya que el 0 va a representar que ningun documento entro ahi
-        cat= np.zeros((self.SOM.shape[0], self.SOM.shape[1],10))
-        for c,x in enumerate(X):
-            i,j= self.find_BMU(x)
-            cat[i][j][Y[c]]+=1
+        cat = self.map_per_cat(X, Y)
         totalCat= np.argmax(cat, axis=2)
         return totalCat
+
+    def map_per_cat(self, X, Y):
+        cat = np.zeros((self.SOM.shape[0], self.SOM.shape[1], 10))
+        for c, x in enumerate(X):
+            i, j = self.find_BMU(x)
+            cat[i][j][Y[c]] += 1
+        return cat
