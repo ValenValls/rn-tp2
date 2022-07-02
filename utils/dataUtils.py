@@ -9,7 +9,7 @@ def get_data(archivo_data):
     #Los datos tienen la categoria en la primera columna, y 850 atributos más  
    
     X = np.genfromtxt(archivo_data,dtype='float',delimiter=',',usecols=range(1,851))
-    Y = np.genfromtxt(archivo_data, dtype='float',delimiter=',', usecols=(0,))
+    Y = np.genfromtxt(archivo_data, dtype='int',delimiter=',', usecols=(0,))
 
     return X, Y
 
@@ -88,6 +88,20 @@ def plot3D(X,Y,title):
             ax.set_zlabel('z')
         plt.suptitle(title + ': '+ 'Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3))
         plt.show()
+
+def plotSOMColorMap(categorieMatrix):
+    plt.imshow(categorieMatrix, cmap='Pastel1')
+
+
+    for y in range(categorieMatrix.shape[0]):
+        for x in range(categorieMatrix.shape[1]):
+            plt.text(x , y, '%i' % categorieMatrix[y, x],
+                     horizontalalignment='center',
+                     verticalalignment='center',
+                     )
+
+    plt.suptitle('Categoría más popular por Unidad de Salida')
+    plt.show()
 
 #Estos tres metodos los estoy dejando por ahora solo para probar que anda el RUN correctamente. Posiblemente no sirva para nada
 #TODO en tal caso borrarlo luego

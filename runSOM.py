@@ -2,22 +2,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from SOM.model import SOM as SomModel
-from utils.dataUtils import get_data, plotSOM, u_matrix
+from utils.dataUtils import get_data, plotSOM, plotSOMColorMap
 
 # Dimensions of the SOM grid
-m = 20
+m = 5
 train_data, Y = get_data("./data/tp2_training_dataset.csv")
 
 total_epochs = 0
-model = SomModel(850, 20)
+model = SomModel(850, m)
 for epochs, i in zip([1, 4, 5, 10], range(0,4)):
     total_epochs += epochs
     SOM = model.train(train_data, epochs=epochs)
 
-udm = u_matrix(SOM,m)
+c= model.categorize(train_data, Y)
+print(c)
+plotSOMColorMap(c)
+#udm = u_matrix(SOM,m)
 
-plotSOM(udm, m)
-plt.show()
+#plotSOM(udm, m)
+#plt.show()
 
 
 #

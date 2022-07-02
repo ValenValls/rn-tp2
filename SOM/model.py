@@ -91,3 +91,19 @@ class SOM:
                 udm[i - 1][j - 1] = np.sqrt(self.dist3(SOM[i][j], SOM[i][j + 1]) + self.dist3(SOM[i][j], SOM[i][j - 1]) +
                                             self.dist3(SOM[i][j], SOM[i + 1][j]) + self.dist3(SOM[i][j], SOM[i - 1][j]))
         return udm
+
+    #Tomo un modelo entrenado, conjunto de entrenamiento/validacion X y etiquetas Y
+    #Retorno una matriz de mxm(mismas 2 primeras dimensiones del SOM) donde en cada
+    #posicion esta el numero de categoria del que mas ejemplos cayeron en esa posicion
+    #del SOM al buscar su BMU
+    #todo No se si sera el nombre mas adecuado
+    def categorize(self, X, Y):
+        #En cada posicion i,j,k de cat voy a contar cuantos documentos entran en la posicion i,j
+        #del SOM de la categoria k+1
+        #La tercer coordenada es 10 ya que el 0 va a representar que ningun documento entro ahi
+        cat= np.zeros((self.SOM.shape[0], self.SOM.shape[1],10))
+        for c,x in enumerate(X):
+            i,j= self.find_BMU(x)
+            cat[i][j][Y[c]]+=1
+        totalCat= np.argmax(cat, axis=2)
+        return totalCat
