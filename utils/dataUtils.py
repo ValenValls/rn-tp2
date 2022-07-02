@@ -43,9 +43,7 @@ def proportional_separate_train_validation(X,Y,validation_size=0.1, total_regs=0
     #Separo los indices por categoria    
     indexes_by_cat = [[],[],[],[],[],[],[],[],[]] 
     for idy in range(0,len(Y)):
-        for c in range(1,10):            
-            if(Y[idy] == c):                
-                (indexes_by_cat[c-1]).append(idy)    
+        indexes_by_cat[Y[idy]-1].append(idy)           
     #Separo los indices entre entrenamiento y validacion       
     train_by_cat = []
     validate_by_cat = []
@@ -61,6 +59,19 @@ def proportional_separate_train_validation(X,Y,validation_size=0.1, total_regs=0
     X_validation = X[validate_by_cat, :]
     Y_validation = Y[validate_by_cat]
     return X_train, Y_train, X_validation, Y_validation
+
+#Recibe el dataset a separar, Y la categorias
+#Se puede utilizar con X_validation, Y_validation luego de
+#Mantener el Y no es necesario, ya que estan separados
+def separate_attributes_by_category(X,Y):
+    indexes_by_cat = [[],[],[],[],[],[],[],[],[]]
+    for idy in range(0,len(Y)):
+        indexes_by_cat[Y[idy]-1].append(idy) 
+    Xs_by_category = []
+    for c in range(1,10):    
+        Xs_by_category.append(X[indexes_by_cat[c-1], :])
+    return Xs_by_category
+        
 
 #Hay que normalizar los datos para el aprendizaje hebbiano
 #Devuelvo mean y std para exportarlos al guardar el modelo
