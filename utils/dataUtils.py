@@ -63,11 +63,12 @@ def proportional_separate_train_validation(X,Y,validation_size=0.1, total_regs=0
     return X_train, Y_train, X_validation, Y_validation
 
 #Hay que normalizar los datos para el aprendizaje hebbiano
+#Devuelvo mean y std para exportarlos al guardar el modelo
 def normalize(X):
     mean = X.mean(0)
     std = X.std(0) 
     X = (X - mean) / np.square(std)
-    return X
+    return X, mean, std
 #Agrego title para diferenciar los graficos
 def plot3D(X,Y,title):
     Y = Y.reshape((-1, 1))

@@ -6,14 +6,37 @@ from matplotlib import pyplot as pl
 class Hebbiano:
 
 
-    def __init__(self, N,M, reglas=None):
-        self.weights = np.random.normal( 0, 0.1, (N,M))
+    def __init__(self, N=None,M=None, reglas=None):
+        if N and M :
+            self.weights = np.random.normal( 0, 0.1, (N,M))
         #todo no se si aporta en algo pero dejo por aca. Lei en general que los pesos se inicializaban con zero...
         # esto no funciona si lo inicializo con cero. Pero podriamos con numeros muy chicos como hicimos para
         # el perceptron self.weights = np.random.randn(N,M) * 0.0001 No se si cambia significativamente.
         self.m = M
         self.n = N
         self.reglas = reglas
+
+    def export_model(self, filename):
+        # El formato del archivo seria
+        # N = Cantidad de nodos entrada
+        # M = Cantidad de nodos salida
+        # string indicando 'oja' o 'sanger'
+        # Matriz de pesos escrita como N filas de N elementos separados por coma
+        with open(filename, 'w', encoding='utf-8') as file:
+            file.write(f"{self.n}\n")
+            file.write(f"{self.m}\n")
+            file.write(f"{self.reglas}\n")
+            np.savetxt(file, self.weights, fmt='%.6f')
+
+    def import_model(self, filename):
+        with open(filename, 'r', encoding='utf-8') as file:
+            file_rows = file.readlines()
+        self.n = int(file_rows[0])
+        self.m = int(file_rows[1])
+        self.reglas = file_rows[2]
+        W = np.matrix((';').join([row[:-1] for row in file_rows[3: (3+self.n)]]))
+        self.weights = np.asarray(W)
+        assert self.weights.shape == (self.n, self.m)
 
 
     #Para ver que tan cerca se esta de converger y decidir si parar, utilizamos la ortogonalidad de los pesos

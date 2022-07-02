@@ -3,10 +3,36 @@ import numpy as np
 
 class SOM:
 
-    def __init__(self, n, m):
+    def __init__(self, n=None, m=None):
         ## n es la cantidad de palabras, m el tamaño de la matriz de pesos de cada celula.
         rand = np.random.RandomState(0)
-        self.SOM = rand.randn(m, m, n) * 0.01
+        self.n = n
+        self.m = m
+        if n and m:
+            self.SOM = rand.randn(m, m, n) * 0.01
+
+    def export_model(self, filename):
+        # El formato del archivo seria
+        # N = Cantidad de palabras
+        # M = Donde MxM es el tamaño de la matriz de pesos de cada palabra
+        # A continuacion, la matriz de pesos de (m, m, n)
+        with open(filename, 'w', encoding='utf-8') as file:
+            file.write(f"{self.n}\n")
+            file.write(f"{self.m}\n")
+            for layer in self.SOM:
+                np.savetxt(file, layer, fmt='%.6f')
+
+    def import_model(self, filename):
+        with open(filename, 'r', encoding='utf-8') as file:
+            file_rows = file.readlines()
+        self.n = int(file_rows[0])
+        self.m = int(file_rows[1])
+        mat = []
+        for l1 in range(2, 2+self.m):
+            mat.append(np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[l1: (l1 + self.m)]]))))
+        self.SOM = np.stack(mat)
+        assert self.SOM.shape == (self.m, self.m, self.n), self.SOM.shape
+
 
     # Return the (g,h) index of the BMU in the grid
     def find_BMU(self, x):
