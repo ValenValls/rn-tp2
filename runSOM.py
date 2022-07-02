@@ -5,24 +5,31 @@ from SOM.model import SOM as SomModel
 from utils.dataUtils import get_data, plotSOM, plotSOMColorMap
 
 # Dimensions of the SOM grid
-m = 5
+m = 10
 train_data, Y = get_data("./data/tp2_training_dataset.csv")
 
 total_epochs = 0
 model = SomModel(850, m)
-for epochs, i in zip([1, 4, 5, 10], range(0,4)):
-    total_epochs += epochs
-    SOM = model.train(train_data, epochs=epochs)
 
-c= model.categorize(train_data, Y)
-print(c)
-plotSOMColorMap(c)
+fig, ax = plt.subplots(
+    nrows=2, ncols=4, figsize=(15, 3.5),
+    subplot_kw=dict(xticks=[], yticks=[]))
+for epochs, i in zip([1, 4, 5, 10, 5, 5, 5, 15], range(0,8)):
+    total_epochs += epochs
+    x= i % 4
+    y = i // 4
+    SOM = model.train(train_data, epochs=epochs)
+    ax[y][x].imshow(model.categorize(train_data, Y), cmap='Pastel1')
+    ax[y][x].title.set_text('Epochs = ' + str(total_epochs))
+
+plt.show()
+
+# c= model.categorize(train_data, Y)
+# print(c)
+# plotSOMColorMap(c)
 #udm = u_matrix(SOM,m)
 
-#plotSOM(udm, m)
-#plt.show()
-
-
+# plotSOM(udm, m)
 #
 # tad = np.zeros((m, m))
 #
