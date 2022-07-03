@@ -45,10 +45,7 @@ class Hebbiano:
 
     #Entrenamiento del modelo con el algoritmo de Oja
     
-    #Los pesos se van al infinito, en los ejercicios de la practica me dejo de pasar cuando normalice los datos
-    #Puede que el error venga del lado normalizacion
-    #Con el limite de 100 a 1000 mejora bastante
-    def trainOja(self,X,error_limit=0.01, limit=100):
+    def trainOja(self,X,error_limit=0.01, limit=100, lr=0.0001):
         t = 1
 
         while t < limit and (self.ortogonalidad() > error_limit):
@@ -59,32 +56,23 @@ class Hebbiano:
             #  Aumentando el limite a 5000 corta con error 0.0009998011326659293
             #  a las 2453 iteraciones. Aumentando el learning rate da nans... esto se me hace raro puesto
 
-
-            #Con este lr adaptativo da overflow
-            #learning_rate = 1 / t
-            #Anduvo bastante bien la ortogonalidad con este lr
-            learning_rate = 0.0001/t
-            #Me hace ruido el overflow igual, despues reviso las cuentas
-            #learning_rate = 0.0001/t
+            learning_rate = lr/t
+            #learning_rate = 0.0001
             for x in X:
-                #Las cuentas me coinciden con las que yo tenia
-                #Pero tuve que hacer este reshape porque x es un vector
                 x = x.reshape((1, -1))
                 Y = np.dot( x, self.weights)
                 Z = np.dot( Y, self.weights.T)
                 dW = np.outer( x-Z, Y)
                 self.weights+= learning_rate * dW
             t += 1
-        #print(self.ortogonalidad())
 
     #Entrenamiento del modelo con el algoritmo de Sanger
 
-    #Hay error con la resta de x.T y Z, me parece que hay q meter reshape en algun lado, HECHO
-    def trainSanger(self,X,error_limit=0.01, limit=100):
+
+    def trainSanger(self,X,error_limit=0.01, limit=100, lr=0.0001):
         t = 1        
         while t<limit and (self.ortogonalidad() > error_limit):
-            #learning_rate=1/t
-            learning_rate = 0.0001/t
+            learning_rate = lr/t
             #learning_rate = 0.0001
             for x in X:
                 x = x.reshape((1, -1))
@@ -94,8 +82,6 @@ class Hebbiano:
                 dW = (x.T - Z) * Y
                 self.weights+= learning_rate * dW
             t += 1
-        #La ortogonalidad de este dio cerca de 0.1 asi que esta bastante bien creo
-        #print(self.ortogonalidad())
 
     def train(self, X, error_limit=0.01, limit=100):
         if self.reglas == 'oja':

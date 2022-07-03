@@ -48,16 +48,16 @@ class SOM:
         return np.unravel_index(np.argmin(distSq, axis=None), distSq.shape)
 
 
-    # Update the weights of the SOM cells when given a single training example
-    # and the model parameters along with BMU coordinates as a tuple
+    # Actualizo los pesos de cada posicion del SOM dado una sola instancia del conjunto de entrada,
+    # los parametros del modelo y las coordenadas del BMU como tupla
     def update_weights(self, train_ex, learn_rate, radius_sq,
                        BMU_coord, step=3):
         g, h = BMU_coord
-        # if radius is close to zero then only BMU is changed
+        # Si el radio es cercano a 0 solo se modifica el BMU
         if radius_sq < 1e-3:
             self.SOM[g, h, :] += learn_rate * (train_ex - self.SOM[g, h, :])
             return self.SOM
-        # Change all cells in a small neighborhood of BMU
+        # Modifico los pesos en un vecindario chico alrededor del BMU
         for i in range(max(0, g - step), min(self.SOM.shape[0], g + step)):
             for j in range(max(0, h - step), min(self.SOM.shape[1], h + step)):
                 dist_sq = np.square(i - g) + np.square(j - h)
@@ -66,8 +66,8 @@ class SOM:
         return self.SOM
 
 
-    # Main routine for training an SOM. It requires an initialized SOM grid
-    # or a partially trained grid as parameter
+    # Algoritmo de entrenamiento del SOM. Toma un tensor del SOM inicializado o
+    #un SOM parcialmente entrenado
     def train(self, train_data, learn_rate=.99, radius_sq=10,
               lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None, fn='train.png'):
         learn_rate_0 = learn_rate
@@ -91,7 +91,7 @@ class SOM:
                 g, h = self.find_BMU(train_ex)
                 self.SOM = self.update_weights(train_ex,
                                      learn_rate, radius_sq, (g, h))
-            # Update learning rate and radius
+            # Actualizo learning rate y radius
             learn_rate = learn_rate_0 * np.exp(-epoch * lr_decay)
             radius_sq = radius_0 * np.exp(-epoch * radius_decay)
             if epoch in to_graph:
@@ -110,7 +110,7 @@ class SOM:
             # fig.close()
         return self.SOM
 
-    def caregorize_and_map(self, X, Y, learn_rate, radius, epochs, fn='validation.png'):
+    def categorize_and_map(self, X, Y, learn_rate, radius, epochs, fn='validation.png'):
         fig = plt.figure(2)
         fig, ax = plt.subplots(
             nrows=3, ncols=3, figsize=(15, 20),
@@ -153,7 +153,6 @@ class SOM:
     #Retorno una matriz de mxm(mismas 2 primeras dimensiones del SOM) donde en cada
     #posicion esta el numero de categoria del que mas ejemplos cayeron en esa posicion
     #del SOM al buscar su BMU
-    #todo No se si sera el nombre mas adecuado
     def categorize(self, X, Y):
         #En cada posicion i,j,k de cat voy a contar cuantos documentos entran en la posicion i,j
         #del SOM de la categoria k+1

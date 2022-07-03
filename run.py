@@ -98,7 +98,7 @@ if __name__ == '__main__':
                                 X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y)
                                 modelo.change_m_and_reset(m)
                                 SOM = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=True, Y=Y_train)
-                                modelo.caregorize_and_map(X_val, Y_val, learn_rate=lr, radius=r, epochs=e)
+                                modelo.categorize_and_map(X_val, Y_val, learn_rate=lr, radius=r, epochs=e)
 
 
         if run.save:
