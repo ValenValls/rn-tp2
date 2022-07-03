@@ -115,20 +115,20 @@ def plotSOMColorMap(categorieMatrix):
     plt.show()
 
 #Estos tres metodos los estoy dejando por ahora solo para probar que anda el RUN correctamente. Posiblemente no sirva para nada
-#TODO en tal caso borrarlo luego
-def plotSOM(udm, m):
-    fig = plt.figure(figsize=(4, 4), dpi=120)
-    axes1 = fig.add_subplot(111, projection="3d")
-    ax = fig.gca()
-    xx_1 = np.arange(1, m - 1, 1)
-    xx_2 = np.arange(1, m - 1, 1)
-    x_1, x_2 = np.meshgrid(xx_1, xx_2)
-    Z = np.array([[udm[i][j] for i in range(m - 2)] for j in range(m - 2)])
-    ax.set_zlim(0, .5)
-    ax.plot_surface(x_1, x_2, Z, cmap=cm.gray)
-    plt.xlabel('$i$', fontsize=11)
-    plt.ylabel('$j$', fontsize=11)
-    plt.title("U-matrix", fontsize=11)
+# #TODO en tal caso borrarlo luego
+# def plotSOM(udm, m):
+#     fig = plt.figure(figsize=(4, 4), dpi=120)
+#     axes1 = fig.add_subplot(111, projection="3d")
+#     ax = fig.gca()
+#     xx_1 = np.arange(1, m - 1, 1)
+#     xx_2 = np.arange(1, m - 1, 1)
+#     x_1, x_2 = np.meshgrid(xx_1, xx_2)
+#     Z = np.array([[udm[i][j] for i in range(m - 2)] for j in range(m - 2)])
+#     ax.set_zlim(0, .5)
+#     ax.plot_surface(x_1, x_2, Z, cmap=cm.gray)
+#     plt.xlabel('$i$', fontsize=11)
+#     plt.ylabel('$j$', fontsize=11)
+#     plt.title("U-matrix", fontsize=11)
 # U-matrix
 # def dist3(p1,p2):
 #     """

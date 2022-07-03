@@ -37,6 +37,10 @@ class SOM:
         self.SOM = np.stack(mat)
         assert self.SOM.shape == (self.m, self.m, self.n), self.SOM.shape
 
+    def change_m_and_reset(self,m):
+        rand = np.random.RandomState(0)
+        self.m = m
+        self.SOM = rand.randn(m, m, self.n) *0.1
 
     # Return the (g,h) index of the BMU in the grid
     def find_BMU(self, x):
@@ -65,7 +69,7 @@ class SOM:
     # Main routine for training an SOM. It requires an initialized SOM grid
     # or a partially trained grid as parameter
     def train(self, train_data, learn_rate=.99, radius_sq=10,
-              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None, fn='.png'):
+              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None, fn='train.png'):
         learn_rate_0 = learn_rate
         radius_0 = radius_sq
         if graph:
@@ -106,6 +110,22 @@ class SOM:
             # fig.close()
         return self.SOM
 
+    def caregorize_and_map(self, X, Y, learn_rate, radius, epochs, fn='validation.png'):
+        fig = plt.figure(2)
+        fig, ax = plt.subplots(
+            nrows=3, ncols=3, figsize=(15, 20),
+            subplot_kw=dict(xticks=[], yticks=[]))
+        mat = self.map_per_cat(X, Y)
+        for idx in range(0, 9):
+            x = idx % 3
+            y = idx // 3
+            current_ax = ax[y][x]
+            self.plot_ax(mat[:, :, idx + 1], current_ax, idx, cmap='gray_r', title='Categoria ', legend='#Docs')
+        fig.subplots_adjust(hspace=.3, wspace=.3)
+        fig.suptitle(f"Clasificación del set de validación - lr: {learn_rate} - radio: {radius} ", fontsize=14)
+        fig.savefig(f"SOM_lr_{learn_rate}_radio_{radius}_epochs_{epochs}_{fn}")
+        fig.show()
+
     def plot_ax(self, categorized, current_ax, epoch, title='Epochs = ', cmap='Paired', legend='Categoria'):
         im = current_ax.imshow(categorized, cmap=cmap)
         title = f'{title} ' + str(epoch + 1)
@@ -128,23 +148,6 @@ class SOM:
         current_ax.legend(title=legend, handles=patches, bbox_to_anchor=(1.05, .95), loc=2,
                           borderaxespad=0., labelspacing=0, handleheight=0.5,
                           fontsize='x-small')
-
-    ## U-MATRIX
-    def dist3(self, p1, p2):
-        """
-        Square of the Euclidean distance between points p1 and p2
-        in 3 dimensions.
-        """
-        return (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2
-
-    def u_matrix(self):
-        udm = np.zeros((self.m - 2, self.m - 2))  # initiaize U-matrix with elements set to 0
-        SOM = self.SOM
-        for i in range(1, self.m - 1):  # loops over the neurons in the grid
-            for j in range(1, self.m - 1):
-                udm[i - 1][j - 1] = np.sqrt(self.dist3(SOM[i][j], SOM[i][j + 1]) + self.dist3(SOM[i][j], SOM[i][j - 1]) +
-                                            self.dist3(SOM[i][j], SOM[i + 1][j]) + self.dist3(SOM[i][j], SOM[i - 1][j]))
-        return udm
 
     #Tomo un modelo entrenado, conjunto de entrenamiento/validacion X y etiquetas Y
     #Retorno una matriz de mxm(mismas 2 primeras dimensiones del SOM) donde en cada

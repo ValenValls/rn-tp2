@@ -4,6 +4,7 @@ from SOM.model import SOM
 from utils.dataUtils import *
 import numpy as np
 from matplotlib import pyplot as plt
+from math import sqrt
 
 MODELO = {'hebb': Hebbiano,
           'som': SOM}
@@ -39,9 +40,6 @@ if __name__ == '__main__':
     run = Consola()
     X, Y = get_data(run.data_file)
 
-    #TODO dependiendo de si guardemos medias y std se normaliza aca o en cada opcion por separado
-    X, mean, std = normalize(X)
-
     if run.args:
         # Si recibo argumentos los dos primeros siempre son N y M. Los recibo como strings y debo convertirlos en numeros
         #entrada
@@ -66,35 +64,42 @@ if __name__ == '__main__':
         # todo definir el formato de archivo, etc
         modelo.import_model(run.modelo_file)
         if run.model == 'hebb':
+            X, mean, std = normalize(X)
             predicted = modelo.predict(X)
             regla_modelo = modelo.reglas + '_'
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
             #TODO hay que terminar el som para que esto pueda hacer algo
-            plotSOM(modelo.u_matrix(), modelo.m)  # el segundo dato es M
+            modelo.caregorize_and_map(X, Y, learn_rate='saved', radius='saved', epochs='saved')
             plt.show()
-            assert True == False, 'Falta implementar esto'
+            # assert True == False, 'Falta implementar esto'
     else:
          # Si no tengo un modelo tengo que entrenar de cero segun el ejercicio.
 
 
         if run.model == 'hebb':
+            X, mean, std = normalize(X)
             modelo.train(X)
             predicted = modelo.predict(X)
             regla_modelo = run.args[2].upper() + '_'
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
-            modelo.train(X)
-            # TODO esto era para ir graficando valores intermedios. Creo que ya no es necesario.
-            # total_epochs = 0
-            # for epochs, i in zip([1, 4, 5, 10], range(0, 4)):
-            #     total_epochs += epochs
-            #     SOM = modelo.train(X, epochs=epochs)
-            ##TODO me parece que hice algo mal al pasar el grafico porque sale raro
-            # igual tampoco se que estamos graficando
-            # udm = u_matrix(SOM, run.args[1])
-            plotSOM(modelo.u_matrix(), modelo.m) # el segundo dato es M
-            plt.show()
+            #TODO armado para que pruebe varias combinaciones pero se pisan las salidas.
+            val_size = [0.2] #[0.1, 0.2, 0.5]
+            m_choice = [6] #[3, 6, 9, int(sqrt(5*sqrt(N)))]
+            learn_rate_choice = [.3] #[.01, .1, .3, 1]
+            radius_choice = [3] #[1, 3, 5, 10]
+            epochs_choice = [8] #[8, 16]
+            for val in val_size:
+                for m in m_choice:
+                    for lr in learn_rate_choice:
+                        for r in radius_choice:
+                            for e in epochs_choice:
+                                X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y)
+                                modelo.change_m_and_reset(m)
+                                SOM = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=True, Y=Y_train)
+                                modelo.caregorize_and_map(X_val, Y_val, learn_rate=lr, radius=r, epochs=e)
+
 
         if run.save:
              # TODO esto era para guardar medias y std para normalizar nuevos valores
