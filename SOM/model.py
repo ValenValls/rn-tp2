@@ -116,7 +116,7 @@ class SOM:
                 idx = to_graph.index(epoch)
                 x = idx % 4
                 y = idx // 4
-                categorized = self.categorize(train_data, Y)
+                categorized = self.categorize_grid(train_data, Y)
                 current_ax = ax[y][x]
                 self.plot_ax(categorized, current_ax, epoch)
 
@@ -127,20 +127,24 @@ class SOM:
             fig.savefig(file)
 
         if len(Y) > 0:
-            self.categories = self.categorize(train_data,Y)
+            self.categories = self.categorize_grid(train_data, Y)
             acc, _, _ = self.accuracy(train_data,Y)
 
         return self.SOM, acc
 
 
-
-
+    def categorize(self, X):
+        pred = []
+        for doc in X:
+            i, j = self.find_BMU(doc)
+            pred.append(self.categories[i, j])
+        return pred
 
     #Tomo un modelo entrenado, conjunto de entrenamiento/validacion X y etiquetas Y
     #Retorno una matriz de mxm(mismas 2 primeras dimensiones del SOM) donde en cada
     #posicion esta el numero de categoria del que mas ejemplos cayeron en esa posicion
     #del SOM al buscar su BMU
-    def categorize(self, X, Y):
+    def categorize_grid(self, X, Y):
         #En cada posicion i,j,k de cat voy a contar cuantos documentos entran en la posicion i,j
         #del SOM de la categoria k+1
         #La tercer coordenada es 10 ya que el 0 va a representar que ningun documento entro ahi
