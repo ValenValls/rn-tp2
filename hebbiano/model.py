@@ -8,7 +8,11 @@ class Hebbiano:
 
     def __init__(self, N=None,M=None, reglas=None):
         if N and M :
-            self.weights = np.random.normal( 0, 0.1, (N,M))
+            #Mejor
+            self.weights = np.random.normal( -0.1, 0.1, (N,M))
+        #self.weights = np.random.randn(N, M) * 0.0001
+        #self.weights = np.random.normal(0, 0.1, (N, M))
+        #self.weights =np.random.normal(scale=0.25, size=(N, M))
         #todo no se si aporta en algo pero dejo por aca. Lei en general que los pesos se inicializaban con zero...
         # esto no funciona si lo inicializo con cero. Pero podriamos con numeros muy chicos como hicimos para
         # el perceptron self.weights = np.random.randn(N,M) * 0.0001 No se si cambia significativamente.
@@ -47,7 +51,7 @@ class Hebbiano:
     
     def trainOja(self,X,error_limit=0.01, limit=100, lr=0.0001):
         t = 1
-
+        X_train = X.copy()
         while t < limit and (self.ortogonalidad() > error_limit):
             # todo Poniendo pesos bajitos y limite 100 no corta por el error sino por el limite.
             #  Subiendo el limite, corta a las 250 vueltas aprox por el error.
@@ -58,7 +62,8 @@ class Hebbiano:
 
             learning_rate = lr/t
             #learning_rate = 0.0001
-            for x in X:
+            np.random.shuffle(X_train)
+            for x in X_train:
                 x = x.reshape((1, -1))
                 Y = np.dot( x, self.weights)
                 Z = np.dot( Y, self.weights.T)
@@ -70,11 +75,13 @@ class Hebbiano:
 
 
     def trainSanger(self,X,error_limit=0.01, limit=100, lr=0.0001):
-        t = 1        
+        t = 1
+        X_train = X.copy()
         while t<limit and (self.ortogonalidad() > error_limit):
             learning_rate = lr/t
             #learning_rate = 0.0001
-            for x in X:
+            np.random.shuffle(X_train)
+            for x in X_train:
                 x = x.reshape((1, -1))
                 Y = np.dot( x, self.weights)
                 D = np.triu( np.ones((self.m,self.m)))

@@ -93,40 +93,21 @@ def plot3D(X,Y,title):
 
 
     for i in range(0,9,3):
+
         for j, (a, b) in enumerate(proyecciones):
-            ax = plt.subplot(4, 4, int(4*i/3)+j + 1, projection="3d")
+            ax = plt.subplot(3, 4, int(4*i/3)+j + 1, projection="3d")
             ax.scatter3D(X[:, i], X[:, i+1], X[:, i+2], c=Y)
             ax.view_init(a, b)
             ax.set_xlabel('x')
             ax.set_ylabel('y')
             ax.set_zlabel('z')
-
+        #plt.gca().set_title('Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3), loc='left')
+        plt.subplot(3, 4, int(4*i/3) + 2).set_title('Componentes Principales Y{},Y{},Y{}'.format(i+1, i + 2, i + 3), x=1.2, y=1.3, fontsize=14)
     #plt.suptitle(title + ': '+ 'Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3))
-    plt.suptitle(title)
-    # change rows/cols accordingly
-    # rows = 3
-    # cols = 4
-    #
-    # fig = plt.figure(figsize=(14, 12), constrained_layout=True)
-    # fig.suptitle('Figure title')
-    #
-    # # create rows x 1 subfigs
-    # subfigs = fig.subfigures(nrows=rows, ncols=1)
-    #
-    # for row, subfig in enumerate(subfigs):
-    #     subfig.suptitle(f'Subplot row title {row}')
-    #
-    #     # create 1 x cols subplots per subfig
-    #     axs = subfig.subplots(nrows=1, ncols=cols)
-    #     for col, ax in enumerate(axs):
-    #         ax = plt.subplot(4, 4, (3 * row) + col+1, projection="3d")
-    #         ax.scatter3D(X[:, (3 * row)], X[:, (3 * row) + 1], X[:, (3 * row) + 2], c=Y)
-    #         ax.set_title("Subplot ax title")
-    #         ax.set_xlabel('x')
-    #         ax.set_ylabel('y')
-    #         ax.set_zlabel('z')
-
+    plt.suptitle(title, fontsize=16)
+    plt.subplots_adjust(hspace=.6, wspace=.6)
     plt.show()
+
 
 
 
