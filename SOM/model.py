@@ -3,7 +3,7 @@ import os
 import numpy as np
 import math
 import matplotlib.pyplot as plt
-from matplotlib import cm
+
 import matplotlib.patches as mpatches
 
 
@@ -18,7 +18,15 @@ class SOM:
             self.SOM = rand.randn(m, m, n) *0.1
             self.categories = np.zeros((m, m))
 
-    def export_model(self, filename):
+    #Metodo que permite variar el m una vez creado el modelo. Resetea los pesos y categorias.
+    def change_m_and_reset(self,m):
+        rand = np.random.RandomState(0)
+        self.m = m
+        self.SOM = rand.randn(m, m, self.n) *0.1
+        self.categories = np.zeros((m, m))
+
+
+    def export_model(self, filename, graph=False):
         # El formato del archivo seria
         # N = Cantidad de palabras
         # M = Donde MxM es el tamaño de la matriz de pesos de cada palabra
@@ -30,8 +38,10 @@ class SOM:
             for layer in self.SOM:
                 np.savetxt(file, layer, fmt='%.6f')
             np.savetxt(file, self.categories, fmt='%i')
+        if graph:
+            self.plot_mapeo_categorias()
 
-    def import_model(self, filename):
+    def import_model(self, filename, graph=False):
         with open(filename, 'r', encoding='utf-8') as file:
             file_rows = file.readlines()
         self.n = int(file_rows[0])
@@ -45,20 +55,11 @@ class SOM:
         self.categories = np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[-(self.m): ]])))
         assert self.SOM.shape == (self.m, self.m, self.n), self.SOM.shape
         assert self.categories.shape == (self.m, self.m), self.categories.shape
-        fig, ax = plt.subplots(
-            nrows=1, ncols=1, figsize=(15, 20),
-            subplot_kw=dict(xticks=[], yticks=[]))
-        self.plot_ax(self.categories,ax,-1, title='Mapa de categorias recuperado ', cmap='Paired', legend='Categoria')
-        fig.savefig('mapa_recuperado.png')
-        self.export_model('asiquedo.txt')
+        if graph:
+            self.plot_mapeo_categorias()
 
-    def change_m_and_reset(self,m):
-        rand = np.random.RandomState(0)
-        self.m = m
-        self.SOM = rand.randn(m, m, self.n) *0.1
-        self.categories = np.zeros((m, m))
 
-    # Return the (g,h) index of the BMU in the grid
+    # Devuelve el indice del BMU en la grilla
     def find_BMU(self, x):
         distSq = (np.square(self.SOM - x)).sum(axis=2)
         return np.unravel_index(np.argmin(distSq, axis=None), distSq.shape)
@@ -124,8 +125,6 @@ class SOM:
             fig.suptitle(f"Mapeo de Características - lr: {learn_rate_0} - radio: {radius_0} ", fontsize=14)
             file = os.path.join(path,f"{fn}_train.png")
             fig.savefig(file)
-            # fig.show()
-            # fig.close()
 
         if len(Y) > 0:
             self.categories = self.categorize(train_data,Y)
@@ -133,46 +132,9 @@ class SOM:
 
         return self.SOM, acc
 
-    def categorize_and_map(self, X, Y, fn='validation.png', title='Clasificación del set de validación', path=''):
-        fig = plt.figure(2)
-        fig, ax = plt.subplots(
-            nrows=3, ncols=3, figsize=(15, 20),
-            subplot_kw=dict(xticks=[], yticks=[]))
-        mat = self.map_per_cat(X, Y)
-        for idx in range(0, 9):
-            x = idx % 3
-            y = idx // 3
-            current_ax = ax[y][x]
-            self.plot_ax(mat[:, :, idx + 1], current_ax, idx, cmap='gray_r', title='Categoria ', legend='#Docs')
-        fig.subplots_adjust(hspace=.3, wspace=.3)
-        fig.suptitle(f"{title} ", fontsize=14)
-        file = os.path.join(path, f"{fn}_classify.png")
-        fig.savefig(file)
-        # fig.show()
-        # fig.close()
 
-    def plot_ax(self, categorized, current_ax, epoch, title='Epochs = ', cmap='Paired', legend='Categoria'):
-        im = current_ax.imshow(categorized, cmap=cmap)
-        title = f'{title} ' + str(epoch + 1)
-        current_ax.title.set_text(title)
-        values = np.unique(categorized.ravel())
-        colors = [im.cmap(im.norm(value)) for value in values]
-        patches = [mpatches.Patch(color=colors[i], label="{l}".format(l=values[i])) for i in
-                   range(len(values))]
-        # Major ticks
-        current_ax.set_xticks(np.arange(0, self.m, 1))
-        current_ax.set_yticks(np.arange(0, self.m, 1))
-        # Labels for major ticks
-        current_ax.set_xticklabels(np.arange(1, self.m + 1, 1))
-        current_ax.set_yticklabels(np.arange(1, self.m + 1, 1))
-        # Minor ticks
-        current_ax.set_xticks(np.arange(-.5, self.m, 1), minor=True)
-        current_ax.set_yticks(np.arange(-.5, self.m, 1), minor=True)
-        # Gridlines based on minor ticks
-        current_ax.grid(which='minor', color='black', linestyle='--', linewidth=1)
-        current_ax.legend(title=legend, handles=patches, bbox_to_anchor=(1.05, .95), loc=2,
-                          borderaxespad=0., labelspacing=0, handleheight=0.5,
-                          fontsize='x-small')
+
+
 
     #Tomo un modelo entrenado, conjunto de entrenamiento/validacion X y etiquetas Y
     #Retorno una matriz de mxm(mismas 2 primeras dimensiones del SOM) donde en cada
@@ -204,3 +166,51 @@ class SOM:
                 accurate[cat] += 1
         acc = sum(accurate)/sum(total)
         return acc, total, accurate
+
+    ### METODOS PARA GRAFICAR
+    def plot_mapeo_categorias(self, fn='mapa_caracteristicas.png', path=''):
+        fig, ax = plt.subplots(
+            nrows=1, ncols=1, figsize=(15, 20),
+            subplot_kw=dict(xticks=[], yticks=[]))
+        self.plot_ax(self.categories, ax, title='Mapa de categorias recuperado ', cmap='Paired', legend='Categoria')
+        file = os.path.join(path, fn)
+        fig.savefig(file)
+
+    def plot_ax(self, categorized, current_ax, epoch, title='Epochs = ', cmap='Paired', legend='Categoria'):
+        im = current_ax.imshow(categorized, cmap=cmap)
+        title = (f'{title} ' + str(epoch + 1) ) if epoch else title
+        current_ax.title.set_text(title)
+        values = np.unique(categorized.ravel())
+        colors = [im.cmap(im.norm(value)) for value in values]
+        patches = [mpatches.Patch(color=colors[i], label="{l}".format(l=values[i])) for i in
+                   range(len(values))]
+        # Major ticks
+        current_ax.set_xticks(np.arange(0, self.m, 1))
+        current_ax.set_yticks(np.arange(0, self.m, 1))
+        # Labels for major ticks
+        current_ax.set_xticklabels(np.arange(1, self.m + 1, 1))
+        current_ax.set_yticklabels(np.arange(1, self.m + 1, 1))
+        # Minor ticks
+        current_ax.set_xticks(np.arange(-.5, self.m, 1), minor=True)
+        current_ax.set_yticks(np.arange(-.5, self.m, 1), minor=True)
+        # Gridlines based on minor ticks
+        current_ax.grid(which='minor', color='black', linestyle='--', linewidth=1)
+        current_ax.legend(title=legend, handles=patches, bbox_to_anchor=(1.05, .95), loc=2,
+                          borderaxespad=0., labelspacing=0, handleheight=0.5,
+                          fontsize='x-small')
+
+    def categorize_and_map(self, X, Y, fn='validation.png', title='Clasificación del set de validación', path=''):
+        mat = self.map_per_cat(X, Y)
+        # fig = plt.figure(2)
+        fig, ax = plt.subplots(
+            nrows=3, ncols=3, figsize=(15, 20),
+            subplot_kw=dict(xticks=[], yticks=[]))
+        for idx in range(0, 9):
+            x = idx % 3
+            y = idx // 3
+            current_ax = ax[y][x]
+            self.plot_ax(mat[:, :, idx + 1], current_ax, idx, cmap='gray_r', title='Categoria ', legend='#Docs')
+        fig.subplots_adjust(hspace=.3, wspace=.3)
+        fig.suptitle(f"{title} ", fontsize=14)
+        file = os.path.join(path, f"{fn}_classify.png")
+        fig.savefig(file)

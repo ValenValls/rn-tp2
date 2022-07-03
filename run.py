@@ -3,8 +3,7 @@ from hebbiano.model import Hebbiano
 from SOM.model import SOM
 from utils.dataUtils import *
 import numpy as np
-from matplotlib import pyplot as plt
-from math import sqrt
+
 import os
 
 MODELO = {'hebb': Hebbiano,
@@ -20,17 +19,15 @@ class Consola:
         parser = argparse.ArgumentParser(prog='rn-tp1')
         parser.add_argument('--modelo_file', '-mf', type=str, default=None,
                             help='Archivo de entrada del modelo previamente entrenado')
-        parser.add_argument('--trans_file', '-tf', type=str, default=None,
-                            help='Archivo de entrada con las transformaciones aplicadas al modelo previamente entrenado')
         parser.add_argument('--data_file', '-df', type=str, default='./data/tp2_training_dataset.csv',
                             help='Archivo correspondiente a los Datos de entrada, por default el del tp')
         parser.add_argument('--model', '-m', choices=['som', 'hebb'], default='hebb',
                             help='Modelo a correr, por default Hebbiano con Oja')
         parser.add_argument('--save', '-s', const=True, nargs='?',
                             help='Guarda los datos del modelo entrenado', default=False)
+        parser.add_argument('--graph', '-g', const=True, nargs='?',
+                            help='Grafica las salidas del SOM', default=False)
         parser.add_argument('--out_modelo_file', '-omf', type=str, default='modelo_entrenado.txt',
-                            help='Archivo de salida del modelo previamente entrenado')
-        parser.add_argument('--out_trans_file', '-otf', type=str, default='transformaciones.txt',
                             help='Archivo de salida del modelo previamente entrenado')
         parser.add_argument('--out_data_file', '-odf', type=str, default='predicciones.txt',
                             help='Archivo de salida de las predicciones')
@@ -63,16 +60,16 @@ if __name__ == '__main__':
 
     if run.modelo_file:
         # Si se indica un archivo de modelo por entrada, se asume que se quiere levantar ese modelo para predecir el data_file
-        # todo definir el formato de archivo, etc
-        modelo.import_model(run.modelo_file)
+        modelo.import_model(run.modelo_file, run.graph)
         if run.model == 'hebb':
 
             predicted = modelo.predict(X)
-            regla_modelo = modelo.reglas + '_'
-            plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
+            regla_modelo = modelo.reglas + '_' #Al crear el modelo me guarda la regla en modelo_reglas
+            plot3D(predicted, Y, regla_modelo)
         else:
             #TODO hay que terminar el som para que esto pueda hacer algo
-            modelo.categorize_and_map(X, Y, title='Categorizacion sobre modelo pre-entrenado', fn='salida_preentrenado.png')
+            if run.graph:
+                modelo.categorize_and_map(X, Y, title='Categorizacion sobre modelo pre-entrenado', fn='salida_preentrenado.png')
             acc_val, tot, ok = modelo.accuracy(X, Y)
             print(f'Validation accuracy: {acc_val}')
             for i, (t, e) in enumerate(zip(tot, ok)):
@@ -90,60 +87,68 @@ if __name__ == '__main__':
             regla_modelo = run.args[2].upper() + '_'
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
-            header = 'learning_rate,radio,m,validation,epochs,training_acc,validation_acc,cat_1,cat_2,cat_3,cat_4,cat_5,cat_6,cat_7,cat_8,cat_9\n'
-            with open('results.csv', '+a', encoding='utf-8') as file_acc:
+            header = 'learning_rate,radio,m,validation,epochs,training_acc,validation_acc,sin_cat,cat_1,cat_2,cat_3,cat_4,cat_5,cat_6,cat_7,cat_8,cat_9\n'
+            with open('results.csv', '+w', encoding='utf-8') as file_acc:
                 file_acc.write(header)
 
-                #TODO armado para que pruebe varias combinaciones pero se pisan las salidas.
                 hyper_params = [{'lr': 0.01, 'r': 1, 'm': 3, 'val':0.1, 'e':8},
                                 {'lr': 0.01, 'r': 1, 'm': 9, 'val':0.1, 'e':16},
                                 {'lr': 0.01, 'r': 3, 'm': 3, 'val':0.1, 'e':16},
                                 {'lr': 1, 'r': 10, 'm': 9, 'val':0.1, 'e':16},
                                 {'lr': 0.01, 'r': 1, 'm': 8, 'val': 0.2, 'e': 40},
-                                # {'lr': 0.3, 'r': 3, 'm': 6, 'val':0.5, 'e':24},
-                                # {'lr': 0.3, 'r': 3, 'm': 6, 'val':0.5, 'e':40},
                                 {'lr': 0.3, 'r': 3, 'm': 6, 'val':0.2, 'e':24},
-                                # {'lr': 0.75, 'r': 3, 'm': 6, 'val':0.2, 'e':24},
-                                # {'lr': 0.3, 'r': 3, 'm': 8, 'val':0.5, 'e':24},
-                                # {'lr': 0.3, 'r': 3, 'm': 8, 'val':0.5, 'e':40},
-                                # {'lr': 0.3, 'r': 3, 'm': 8, 'val':0.2, 'e':40},
-                                {'lr': 0.75, 'r': 3, 'm': 8, 'val':0.2, 'e':40}
-                                # {'lr': 0.3, 'r': 5, 'm': 8, 'val':0.2, 'e':40},
-                                # {'lr': 0.75, 'r': 5, 'm': 8, 'val':0.2, 'e':40}
-                                ]
+                                {'lr': 0.75, 'r': 3, 'm': 8, 'val':0.2, 'e':40}]
+
                 best_accuracy = 0
                 best_model = None
+
                 for hp in hyper_params:
                     val = hp['val']
                     lr = hp['lr']
                     r = hp['r']
                     m = hp['m']
                     e = hp['e']
+
                     path = f'SOM_lr_{lr}_r_{r}_m_{m}_val_{val}_e_{e}'
-                    if not os.path.exists(path):
+                    if run.graph and not os.path.exists(path):
                         os.mkdir(path)
+
+                    print(f'Calculando modelo con lr:{lr} r:{r} m:{m} val:{val} e:{e}')
+
                     X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y,validation_size=val)
                     modelo.change_m_and_reset(m)
-                    SOM, acc = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=False, Y=Y_train, path= path, fn='SOM')
-                    if acc > best_accuracy:
-                        best_accuracy= acc
-                        best_model = hp
-                    print (f'lr:{lr} r:{r} m:{m} val:{val} e:{e}')
+                    SOM, acc = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=run.graph, Y=Y_train, path= path, fn='SOM')
+
+                    if run.graph:
+                        title = f"Clasificación del set de validación lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                        modelo.categorize_and_map(X_val, Y_val, title=title, path=path, fn='SOM_val_')
+                        title = f"Clasificación del training set lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                        modelo.categorize_and_map(X_train, Y_train, title=title, path=path, fn='SOM_train_')
+
                     print (f'Training accuracy= {acc}')
+
+                    acc_val, tot, ok = modelo.accuracy(X_val, Y_val)
+                    print(f'Validation accuracy: {acc_val}')
+
+                    #Guardo el modelo que mayor accuracy tiene sobre el conjunto de validacion.
+                    if acc_val > best_accuracy:
+                        best_accuracy= acc_val
+                        best_model = hp
+
                     res = [f'{lr:.6f}', str(r), str(m), f'{val:.6f}', str(e)]
                     res.append(f'{acc:.6f}')
-                    acc_val, tot, ok = modelo.accuracy(X_val, Y_val)
                     res.append(f'{acc_val:.6f}')
-                    print (f'Validation accuracy: {acc_val}')
+
                     acc_cat = np.zeros(10)
                     for i, (t,e ) in enumerate(zip(tot, ok)):
                         if t > 0:
-                            if i>0:
-                                res.append(f'{e/t:.6f}')
+                            res.append(f'{e/t:.6f}')
                             print(f'categoria {i}: {e/t}')
+                        else:
+                            res.append('-')
                     file_acc.write(','.join(res) + '\n')
 
-                # DEJO EL MEJOR MODELO entrenado con todo:
+                # DEJO EL MEJOR MODELO entrenado con el set completo de datos:
                 val = best_model['val']
                 lr = best_model['lr']
                 r = best_model['r']
@@ -154,18 +159,11 @@ if __name__ == '__main__':
                     os.mkdir(path)
                 modelo.change_m_and_reset(m)
                 SOM, acc = modelo.train(X, learn_rate=lr, radius_sq=r, epochs=e, graph=True, Y=Y, path=path,
-                                        fn='SOM')
+                                        fn='BEST_SOM')
                 title = f"Clasificación del set de validación lr:{lr} r:{r} m:{m} val:{val} e:{e}"
-                modelo.categorize_and_map(X_val, Y_val, title=title, path=path, fn='SOM_val_')
+                modelo.categorize_and_map(X_val, Y_val, title=title, path=path, fn='BEST_SOM_val_')
                 title = f"Clasificación del training set lr:{lr} r:{r} m:{m} val:{val} e:{e}"
-                modelo.categorize_and_map(X_train, Y_train, title=title, path=path, fn='SOM_train_')
+                modelo.categorize_and_map(X_train, Y_train, title=title, path=path, fn='BEST_SOM_train_')
 
         if run.save:
-             # TODO esto era para guardar medias y std para normalizar nuevos valores
-             #  pero en ese caso tambien habria que readaptar la funcion para que pueda
-             #  normalizar a partir de ellos. DEFINIR
-             # with open(f"{run.model}_{regla_modelo}{run.out_trans_file}", 'w') as f:
-             #     f.write(f"{N}\n")
-             #     f.write(f"{','.join([str(n) for n in mean])}\n")
-             #     f.write(f"{','.join([str(n) for n in std])}\n")
-             modelo.export_model(f"{run.model}_{regla_modelo}_{run.out_modelo_file}")
+             modelo.export_model(f"{run.model}_{regla_modelo}_{run.out_modelo_file}", run.graph)
