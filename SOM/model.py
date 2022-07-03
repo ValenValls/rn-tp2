@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -14,17 +16,20 @@ class SOM:
         self.m = m
         if n and m:
             self.SOM = rand.randn(m, m, n) *0.1
+            self.categories = np.zeros((m, m))
 
     def export_model(self, filename):
         # El formato del archivo seria
         # N = Cantidad de palabras
         # M = Donde MxM es el tamaño de la matriz de pesos de cada palabra
         # A continuacion, la matriz de pesos de (m, m, n)
+        # Por ultimo la matriz de categorias de mxm
         with open(filename, 'w', encoding='utf-8') as file:
             file.write(f"{self.n}\n")
             file.write(f"{self.m}\n")
             for layer in self.SOM:
                 np.savetxt(file, layer, fmt='%.6f')
+            np.savetxt(file, self.categories, fmt='%i')
 
     def import_model(self, filename):
         with open(filename, 'r', encoding='utf-8') as file:
@@ -35,12 +40,20 @@ class SOM:
         for l1 in range(2, 2+self.m):
             mat.append(np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[l1: (l1 + self.m)]]))))
         self.SOM = np.stack(mat)
+        self.categories = np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[-(self.m): ]])))
         assert self.SOM.shape == (self.m, self.m, self.n), self.SOM.shape
+        assert self.categories.shape == (self.m, self.m), self.categories.shape
+        fig, ax = plt.subplots(
+            nrows=1, ncols=1, figsize=(15, 20),
+            subplot_kw=dict(xticks=[], yticks=[]))
+        self.plot_ax(self.categories,ax,-1, title='Mapa de categorias recuperado ', cmap='Paired', legend='Categoria')
+        fig.savefig('mapa_recuperado.png')
 
     def change_m_and_reset(self,m):
         rand = np.random.RandomState(0)
         self.m = m
         self.SOM = rand.randn(m, m, self.n) *0.1
+        self.categories = np.zeros((m, m))
 
     # Return the (g,h) index of the BMU in the grid
     def find_BMU(self, x):
@@ -69,11 +82,12 @@ class SOM:
     # Main routine for training an SOM. It requires an initialized SOM grid
     # or a partially trained grid as parameter
     def train(self, train_data, learn_rate=.99, radius_sq=10,
-              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=None, fn='train.png'):
+              lr_decay=.1, radius_decay=.1, epochs=10, graph=False, Y=[], fn='SOM.png', path=''):
         learn_rate_0 = learn_rate
         radius_0 = radius_sq
+        to_graph = []
+        X = train_data.copy()
         if graph:
-            X = train_data.copy()
             scale = math.ceil(epochs/8)
             to_graph = [0]
             for i in range(0, 6):
@@ -86,8 +100,8 @@ class SOM:
             graph=[]
 
         for epoch in np.arange(0, epochs):
-            np.random.shuffle(train_data)
-            for train_ex in train_data:
+            np.random.shuffle(X)
+            for train_ex in X:
                 g, h = self.find_BMU(train_ex)
                 self.SOM = self.update_weights(train_ex,
                                      learn_rate, radius_sq, (g, h))
@@ -98,19 +112,25 @@ class SOM:
                 idx = to_graph.index(epoch)
                 x = idx % 4
                 y = idx // 4
-                categorized = self.categorize(X, Y)
+                categorized = self.categorize(train_data, Y)
                 current_ax = ax[y][x]
                 self.plot_ax(categorized, current_ax, epoch)
 
         if graph:
             fig.subplots_adjust(hspace=.3)
             fig.suptitle(f"Mapeo de Características - lr: {learn_rate_0} - radio: {radius_0} ", fontsize=14)
-            fig.savefig(f"SOM_lr_{learn_rate_0}_radio_{radius_0}_epochs_{epochs}_{fn}")
-            fig.show()
+            file = os.path.join(path,f"{fn}_train.png")
+            fig.savefig(file)
+            # fig.show()
             # fig.close()
-        return self.SOM
 
-    def caregorize_and_map(self, X, Y, learn_rate, radius, epochs, fn='validation.png'):
+        if len(Y) > 0:
+            self.categories = self.categorize(train_data,Y)
+            acc, _, _ = self.accuracy(train_data,Y)
+
+        return self.SOM, acc
+
+    def categorize_and_map(self, X, Y, fn='validation.png', title='Clasificación del set de validación', path=''):
         fig = plt.figure(2)
         fig, ax = plt.subplots(
             nrows=3, ncols=3, figsize=(15, 20),
@@ -122,9 +142,11 @@ class SOM:
             current_ax = ax[y][x]
             self.plot_ax(mat[:, :, idx + 1], current_ax, idx, cmap='gray_r', title='Categoria ', legend='#Docs')
         fig.subplots_adjust(hspace=.3, wspace=.3)
-        fig.suptitle(f"Clasificación del set de validación - lr: {learn_rate} - radio: {radius} ", fontsize=14)
-        fig.savefig(f"SOM_lr_{learn_rate}_radio_{radius}_epochs_{epochs}_{fn}")
-        fig.show()
+        fig.suptitle(f"{title} ", fontsize=14)
+        file = os.path.join(path, f"{fn}_classify.png")
+        fig.savefig(file)
+        # fig.show()
+        # fig.close()
 
     def plot_ax(self, categorized, current_ax, epoch, title='Epochs = ', cmap='Paired', legend='Categoria'):
         im = current_ax.imshow(categorized, cmap=cmap)
@@ -168,3 +190,15 @@ class SOM:
             i, j = self.find_BMU(x)
             cat[i][j][Y[c]] += 1
         return cat
+
+    def accuracy(self, X, Y):
+        total =np.zeros(10)
+        accurate = np.zeros(10)
+        for doc, cat in zip(X,Y):
+            i, j = self.find_BMU(doc)
+            predicted = self.categories[i,j]
+            total[cat] +=1
+            if predicted == cat:
+                accurate[cat] += 1
+        acc = sum(accurate)/sum(total)
+        return acc, total, accurate

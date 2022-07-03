@@ -5,6 +5,7 @@ from utils.dataUtils import *
 import numpy as np
 from matplotlib import pyplot as plt
 from math import sqrt
+import os
 
 MODELO = {'hebb': Hebbiano,
           'som': SOM}
@@ -39,6 +40,7 @@ class Consola:
 if __name__ == '__main__':
     run = Consola()
     X, Y = get_data(run.data_file)
+    X, mean, std = normalize(X)
 
     if run.args:
         # Si recibo argumentos los dos primeros siempre son N y M. Los recibo como strings y debo convertirlos en numeros
@@ -64,42 +66,99 @@ if __name__ == '__main__':
         # todo definir el formato de archivo, etc
         modelo.import_model(run.modelo_file)
         if run.model == 'hebb':
-            X, mean, std = normalize(X)
+
             predicted = modelo.predict(X)
             regla_modelo = modelo.reglas + '_'
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
             #TODO hay que terminar el som para que esto pueda hacer algo
-            modelo.caregorize_and_map(X, Y, learn_rate='saved', radius='saved', epochs='saved')
-            plt.show()
+            modelo.categorize_and_map(X, Y, title='Categorizacion sobre modelo pre-entrenado', fn='salida_preentrenado.png')
+            acc_val, tot, ok = modelo.accuracy(X, Y)
+            print(f'Validation accuracy: {acc_val}')
+            for i, (t, e) in enumerate(zip(tot, ok)):
+                if t > 0:
+                    print(f'categoria {i}: {e / t}')
             # assert True == False, 'Falta implementar esto'
     else:
          # Si no tengo un modelo tengo que entrenar de cero segun el ejercicio.
 
 
         if run.model == 'hebb':
-            X, mean, std = normalize(X)
+
             modelo.train(X)
             predicted = modelo.predict(X)
             regla_modelo = run.args[2].upper() + '_'
             plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
         else:
-            #TODO armado para que pruebe varias combinaciones pero se pisan las salidas.
-            val_size = [0.2] #[0.1, 0.2, 0.5]
-            m_choice = [6] #[3, 6, 9, int(sqrt(5*sqrt(N)))]
-            learn_rate_choice = [.3] #[.01, .1, .3, 1]
-            radius_choice = [3] #[1, 3, 5, 10]
-            epochs_choice = [8] #[8, 16]
-            for val in val_size:
-                for m in m_choice:
-                    for lr in learn_rate_choice:
-                        for r in radius_choice:
-                            for e in epochs_choice:
-                                X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y)
-                                modelo.change_m_and_reset(m)
-                                SOM = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=True, Y=Y_train)
-                                modelo.caregorize_and_map(X_val, Y_val, learn_rate=lr, radius=r, epochs=e)
+            header = 'learning_rate,radio,m,validation,epochs,training_acc,validation_acc,cat_1,cat_2,cat_3,cat_4,cat_5,cat_6,cat_7,cat_8,cat_9\n'
+            with open('results.csv', '+a', encoding='utf-8') as file_acc:
+                file_acc.write(header)
 
+                #TODO armado para que pruebe varias combinaciones pero se pisan las salidas.
+                hyper_params = [{'lr': 0.01, 'r': 1, 'm': 3, 'val':0.1, 'e':8},
+                                {'lr': 0.01, 'r': 1, 'm': 9, 'val':0.1, 'e':16},
+                                {'lr': 0.01, 'r': 3, 'm': 3, 'val':0.1, 'e':16},
+                                {'lr': 1, 'r': 10, 'm': 9, 'val':0.1, 'e':16},
+                                {'lr': 0.01, 'r': 1, 'm': 8, 'val': 0.2, 'e': 40},
+                                # {'lr': 0.3, 'r': 3, 'm': 6, 'val':0.5, 'e':24},
+                                # {'lr': 0.3, 'r': 3, 'm': 6, 'val':0.5, 'e':40},
+                                {'lr': 0.3, 'r': 3, 'm': 6, 'val':0.2, 'e':24},
+                                # {'lr': 0.75, 'r': 3, 'm': 6, 'val':0.2, 'e':24},
+                                # {'lr': 0.3, 'r': 3, 'm': 8, 'val':0.5, 'e':24},
+                                # {'lr': 0.3, 'r': 3, 'm': 8, 'val':0.5, 'e':40},
+                                # {'lr': 0.3, 'r': 3, 'm': 8, 'val':0.2, 'e':40},
+                                {'lr': 0.75, 'r': 3, 'm': 8, 'val':0.2, 'e':40}
+                                # {'lr': 0.3, 'r': 5, 'm': 8, 'val':0.2, 'e':40},
+                                # {'lr': 0.75, 'r': 5, 'm': 8, 'val':0.2, 'e':40}
+                                ]
+                best_accuracy = 0
+                best_model = None
+                for hp in hyper_params:
+                    val = hp['val']
+                    lr = hp['lr']
+                    r = hp['r']
+                    m = hp['m']
+                    e = hp['e']
+                    path = f'SOM_lr_{lr}_r_{r}_m_{m}_val_{val}_e_{e}'
+                    if not os.path.exists(path):
+                        os.mkdir(path)
+                    X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y,validation_size=val)
+                    modelo.change_m_and_reset(m)
+                    SOM, acc = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=False, Y=Y_train, path= path, fn='SOM')
+                    if acc > best_accuracy:
+                        best_accuracy= acc
+                        best_model = hp
+                    print (f'lr:{lr} r:{r} m:{m} val:{val} e:{e}')
+                    print (f'Training accuracy= {acc}')
+                    res = [f'{lr:.6f}', str(r), str(m), f'{val:.6f}', str(e)]
+                    res.append(f'{acc:.6f}')
+                    acc_val, tot, ok = modelo.accuracy(X_val, Y_val)
+                    res.append(f'{acc_val:.6f}')
+                    print (f'Validation accuracy: {acc_val}')
+                    acc_cat = np.zeros(10)
+                    for i, (t,e ) in enumerate(zip(tot, ok)):
+                        if t > 0:
+                            if i>0:
+                                res.append(f'{e/t:.6f}')
+                            print(f'categoria {i}: {e/t}')
+                    file_acc.write(','.join(res) + '\n')
+
+                # DEJO EL MEJOR MODELO entrenado con todo:
+                val = best_model['val']
+                lr = best_model['lr']
+                r = best_model['r']
+                m = best_model['m']
+                e = best_model['e']
+                path = f'SOM_lr_{lr}_r_{r}_m_{m}_val_{val}_e_{e}'
+                if not os.path.exists(path):
+                    os.mkdir(path)
+                modelo.change_m_and_reset(m)
+                SOM, acc = modelo.train(X, learn_rate=lr, radius_sq=r, epochs=e, graph=True, Y=Y, path=path,
+                                        fn='SOM')
+                title = f"Clasificación del set de validación lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                modelo.categorize_and_map(X_val, Y_val, title=title, path=path, fn='SOM_val_')
+                title = f"Clasificación del training set lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                modelo.categorize_and_map(X_train, Y_train, title=title, path=path, fn='SOM_train_')
 
         if run.save:
              # TODO esto era para guardar medias y std para normalizar nuevos valores
