@@ -37,8 +37,10 @@ class SOM:
         self.n = int(file_rows[0])
         self.m = int(file_rows[1])
         mat = []
-        for l1 in range(2, 2+self.m):
-            mat.append(np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[l1: (l1 + self.m)]]))))
+        for l1 in range(0, self.m):
+            start = 2 + l1 * self.m
+            end = start + self.m
+            mat.append(np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[start: end]]))))
         self.SOM = np.stack(mat)
         self.categories = np.asarray(np.matrix((';').join([row[:-1] for row in file_rows[-(self.m): ]])))
         assert self.SOM.shape == (self.m, self.m, self.n), self.SOM.shape
@@ -48,6 +50,7 @@ class SOM:
             subplot_kw=dict(xticks=[], yticks=[]))
         self.plot_ax(self.categories,ax,-1, title='Mapa de categorias recuperado ', cmap='Paired', legend='Categoria')
         fig.savefig('mapa_recuperado.png')
+        self.export_model('asiquedo.txt')
 
     def change_m_and_reset(self,m):
         rand = np.random.RandomState(0)
