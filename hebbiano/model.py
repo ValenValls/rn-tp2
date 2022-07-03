@@ -7,11 +7,13 @@ class Hebbiano:
 
 
     def __init__(self, N=None,M=None, reglas=None):
-        if N and M :
+        #if N and M :
             #Mejor
-            self.weights = np.random.normal( -0.1, 0.1, (N,M))
+            #self.weights = np.random.normal( -0.1, 0.1, (N,M))
+        #self.weights = np.random.uniform(-0.1, 0.1, (N, M))
+        self.weights = np.random.normal(0, 0.0001, (N, M))
         #self.weights = np.random.randn(N, M) * 0.0001
-        #self.weights = np.random.normal(0, 0.1, (N, M))
+        #self.weights = np.random.normal(0, 0.001, (N, M))
         #self.weights =np.random.normal(scale=0.25, size=(N, M))
         #todo no se si aporta en algo pero dejo por aca. Lei en general que los pesos se inicializaban con zero...
         # esto no funciona si lo inicializo con cero. Pero podriamos con numeros muy chicos como hicimos para
@@ -20,7 +22,7 @@ class Hebbiano:
         self.n = N
         self.reglas = reglas
 
-    def export_model(self, filename):
+    def import_model(self, filename, graph=False):
         # El formato del archivo seria
         # N = Cantidad de nodos entrada
         # M = Cantidad de nodos salida
@@ -32,7 +34,7 @@ class Hebbiano:
             file.write(f"{self.reglas}\n")
             np.savetxt(file, self.weights, fmt='%.6f')
 
-    def import_model(self, filename):
+    def import_model(self, filename, graph=False):
         with open(filename, 'r', encoding='utf-8') as file:
             file_rows = file.readlines()
         self.n = int(file_rows[0])
@@ -68,7 +70,9 @@ class Hebbiano:
                 Y = np.dot( x, self.weights)
                 Z = np.dot( Y, self.weights.T)
                 dW = np.outer( x-Z, Y)
-                self.weights+= learning_rate * dW
+                self.weights += learning_rate * dW
+            #print(t)
+            #print(self.ortogonalidad())
             t += 1
 
     #Entrenamiento del modelo con el algoritmo de Sanger
@@ -87,10 +91,12 @@ class Hebbiano:
                 D = np.triu( np.ones((self.m,self.m)))
                 Z = np.dot( self.weights, Y.T*D)
                 dW = (x.T - Z) * Y
-                self.weights+= learning_rate * dW
+                self.weights += learning_rate * dW
+            #print(t)
+            #print(self.ortogonalidad())
             t += 1
 
-    def train(self, X, error_limit=0.01, limit=100):
+    def train(self, X, error_limit=0.01, limit=500):
         if self.reglas == 'oja':
             self.trainOja(X, error_limit, limit)
         else:

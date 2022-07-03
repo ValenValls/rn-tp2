@@ -96,7 +96,7 @@ def plot3D(X,Y,title):
 
         for j, (a, b) in enumerate(proyecciones):
             ax = plt.subplot(3, 4, int(4*i/3)+j + 1, projection="3d")
-            ax.scatter3D(X[:, i], X[:, i+1], X[:, i+2], c=Y)
+            ax.scatter3D(X[:, i], X[:, i+1], X[:, i+2], c=Y,marker='.', lw=0)
             ax.view_init(a, b)
             ax.set_xlabel('x')
             ax.set_ylabel('y')
