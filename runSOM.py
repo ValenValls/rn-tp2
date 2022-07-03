@@ -22,7 +22,7 @@ X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(train_da
 total_epochs = 0
 model = SomModel(train_data.shape[1], m)
 SOM = model.train(X_train, learn_rate=.3, radius_sq=3, epochs=16, graph=True, Y=Y_train)
-model.categorize_and_map(X_val, Y_val,learn_rate=.3, radius=3, epochs=16)
+model.categorize_and_map(X_val, Y_val, learn_rate=.3, radius=3, epochs=16)
 
 # plt.show()
 

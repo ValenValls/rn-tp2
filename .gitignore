@@ -8,3 +8,4 @@ utils/.ipynb_checkpoints
 *.db
 *.txt
 /lrvlr_locals/
+/results.csv
