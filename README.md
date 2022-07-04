@@ -70,8 +70,8 @@ EJEMPLOS:
 ~~~bash
 ~$ python -m run --model som -s --args 850 6
 ~$ python -m run --model som --modelo_file som__modelo_entrenado.txt
-~$ python -m run --model hebb -s --args 850 6 oja
-~$ python -m run --model hebb -s --args 850 6 sanger
+~$ python -m run --model hebb -s --args 850 9 oja
+~$ python -m run --model hebb -s --args 850 9 sanger
 ~~~
 
 ## Salida

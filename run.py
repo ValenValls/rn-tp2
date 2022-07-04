@@ -16,7 +16,7 @@ class Consola:
         self.parse_args()
 
     def parse_args(self):
-        parser = argparse.ArgumentParser(prog='rn-tp1')
+        parser = argparse.ArgumentParser(prog='rn-tp2')
         parser.add_argument('--modelo_file', '-mf', type=str, default=None,
                             help='Archivo de entrada del modelo previamente entrenado')
         parser.add_argument('--data_file', '-df', type=str, default='./data/tp2_training_dataset.csv',
@@ -113,16 +113,16 @@ if __name__ == '__main__':
                     if run.graph and not os.path.exists(path):
                         os.mkdir(path)
 
-                    print(f'Calculando modelo con lr:{lr} r:{r} m:{m} val:{val} e:{e}')
+                    print(f'Calculando modelo con learning rate:{lr} influence radius:{r} m:{m} validation size:{val} epochs:{e}')
 
                     X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y,validation_size=val)
                     modelo.change_m_and_reset(m)
                     SOM, acc = modelo.train(X_train, learn_rate=lr, radius_sq=r, epochs=e, graph=run.graph, Y=Y_train, path= path, fn='SOM')
 
                     if run.graph:
-                        title = f"Clasificación del set de validación lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                        title = f"Clasificación del set de validación learning rate:{lr} influence radius:{r} m:{m} validation size:{val} epochs:{e}"
                         modelo.categorize_and_map(X_val, Y_val, title=title, path=path, fn='SOM_val_')
-                        title = f"Clasificación del training set lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                        title = f"Clasificación del training set learning rate:{lr} influence radius:{r} m:{m} validation size:{val} epochs:{e}"
                         modelo.categorize_and_map(X_train, Y_train, title=title, path=path, fn='SOM_train_')
 
                     print (f'Training accuracy= {acc}')
@@ -160,9 +160,9 @@ if __name__ == '__main__':
                 modelo.change_m_and_reset(m)
                 SOM, acc = modelo.train(X, learn_rate=lr, radius_sq=r, epochs=e, graph=True, Y=Y, path=path,
                                         fn='BEST_SOM')
-                title = f"Clasificación del set de validación lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                title = f"Clasificación del set de validación learning rate:{lr} influence radius:{r} m:{m} validation size:{val} epochs:{e}"
                 modelo.categorize_and_map(X_val, Y_val, title=title, path=path, fn='BEST_SOM_val_')
-                title = f"Clasificación del training set lr:{lr} r:{r} m:{m} val:{val} e:{e}"
+                title = f"Clasificación del training set learning rate:{lr} influence radius:{r} m:{m} validation size:{val} epochs:{e}"
                 modelo.categorize_and_map(X_train, Y_train, title=title, path=path, fn='BEST_SOM_train_')
 
         if run.save:
