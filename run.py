@@ -70,7 +70,11 @@ if __name__ == '__main__':
             #TODO hay que terminar el som para que esto pueda hacer algo
             if run.graph:
                 modelo.categorize_and_map(X, Y, title='Categorizacion sobre modelo pre-entrenado', fn='salida_preentrenado.png')
-            acc_val, tot, ok = modelo.accuracy(X, Y)
+            predicted = modelo.categorize(X)
+            if run.save:
+                with open(run.out_data_file, 'w', encoding='utf-8') as f:
+                    np.savetxt(f,predicted)
+            acc_val, tot, ok = modelo.accuracy(Y, predicted)
             print(f'Validation accuracy: {acc_val}')
             for i, (t, e) in enumerate(zip(tot, ok)):
                 if t > 0:
@@ -113,7 +117,7 @@ if __name__ == '__main__':
                     if run.graph and not os.path.exists(path):
                         os.mkdir(path)
 
-                    print(f'Calculando modelo con learning rate:{lr} influence radius:{r} m:{m} validation size:{val} epochs:{e}')
+                    print(f'Calculando modelo con learning rate: {lr} - influence radius:{r} - m: {m} - validation size: {val} - epochs: {e}')
 
                     X_train, Y_train, X_val, Y_val = proportional_separate_train_validation(X, Y,validation_size=val)
                     modelo.change_m_and_reset(m)
@@ -127,7 +131,8 @@ if __name__ == '__main__':
 
                     print (f'Training accuracy= {acc}')
 
-                    acc_val, tot, ok = modelo.accuracy(X_val, Y_val)
+                    predicted = modelo.categorize(X_val)
+                    acc_val, tot, ok = modelo.accuracy(Y_val, predicted)
                     print(f'Validation accuracy: {acc_val}')
 
                     #Guardo el modelo que mayor accuracy tiene sobre el conjunto de validacion.

@@ -128,7 +128,7 @@ class SOM:
 
         if len(Y) > 0:
             self.categories = self.categorize_grid(train_data, Y)
-            acc, _, _ = self.accuracy(train_data,Y)
+            acc, _, _ = self.accuracy(Y, self.categorize(train_data))
 
         return self.SOM, acc
 
@@ -159,30 +159,29 @@ class SOM:
             cat[i][j][Y[c]] += 1
         return cat
 
-    def accuracy(self, X, Y):
+    def accuracy(self, Y, Y_pred):
         total =np.zeros(10)
+        for i in range(0,10):
+            total[i] = sum([1 for val in Y if val==i])
         accurate = np.zeros(10)
-        for doc, cat in zip(X,Y):
-            i, j = self.find_BMU(doc)
-            predicted = self.categories[i,j]
-            total[cat] +=1
-            if predicted == cat:
-                accurate[cat] += 1
+        for expected, predicted in zip(Y,Y_pred):
+            if predicted == expected:
+                accurate[expected] += 1
         acc = sum(accurate)/sum(total)
         return acc, total, accurate
 
     ### METODOS PARA GRAFICAR
     def plot_mapeo_categorias(self, fn='mapa_caracteristicas.png', path=''):
         fig, ax = plt.subplots(
-            nrows=1, ncols=1, figsize=(15, 20),
+            nrows=1, ncols=1, figsize=(10, 5),
             subplot_kw=dict(xticks=[], yticks=[]))
-        self.plot_ax(self.categories, ax, title='Mapa de categorias recuperado ', cmap='Paired', legend='Categoria')
+        self.plot_ax(self.categories, ax, epoch=-1, title='Mapa de categorias entrenado', cmap='Paired', legend='Categoria')
         file = os.path.join(path, fn)
         fig.savefig(file)
 
     def plot_ax(self, categorized, current_ax, epoch, title='Epochs = ', cmap='Paired', legend='Categoria'):
         im = current_ax.imshow(categorized, cmap=cmap)
-        title = (f'{title} ' + str(epoch + 1) ) if epoch else title
+        title = (f'{title} ' + str(epoch + 1) ) if epoch != -1 else title
         current_ax.title.set_text(title)
         values = np.unique(categorized.ravel())
         colors = [im.cmap(im.norm(value)) for value in values]
@@ -213,7 +212,7 @@ class SOM:
             x = idx % 3
             y = idx // 3
             current_ax = ax[y][x]
-            self.plot_ax(mat[:, :, idx + 1], current_ax, idx, cmap='gray_r', title='Categoria ', legend='#Docs')
+            self.plot_ax(mat[:, :, idx + 1], current_ax, idx, cmap='hot_r', title='Categoria ', legend='#Docs')
         fig.subplots_adjust(hspace=.3, wspace=.3)
         fig.suptitle(f"{title} ", fontsize=14)
         file = os.path.join(path, f"{fn}_classify.png")
