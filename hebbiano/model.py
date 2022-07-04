@@ -34,7 +34,7 @@ class Hebbiano:
             file.write(f"{self.reglas}\n")
             np.savetxt(file, self.weights, fmt='%.6f')
 
-    def import_model(self, filename, graph=False):
+    def export_model(self, filename, graph=False):
         with open(filename, 'r', encoding='utf-8') as file:
             file_rows = file.readlines()
         self.n = int(file_rows[0])
@@ -96,7 +96,7 @@ class Hebbiano:
             #print(self.ortogonalidad())
             t += 1
 
-    def train(self, X, error_limit=0.01, limit=500):
+    def train(self, X, error_limit=0.01, limit=100):
         if self.reglas == 'oja':
             self.trainOja(X, error_limit, limit)
         else:

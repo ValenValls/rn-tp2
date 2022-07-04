@@ -89,23 +89,22 @@ def plot3D(X,Y,title):
     proyecciones = [(60, 60), (150, 60),
                     (60, 150), (240, 240), ]
 
-    plt.figure(figsize=(14, 12))
+    plt.figure(figsize=(12, 10))
 
 
     for i in range(0,9,3):
 
         for j, (a, b) in enumerate(proyecciones):
             ax = plt.subplot(3, 4, int(4*i/3)+j + 1, projection="3d")
-            ax.scatter3D(X[:, i], X[:, i+1], X[:, i+2], c=Y,marker='.', lw=0)
+            ax.scatter3D(X[:, i], X[:, i+1], X[:, i+2], c=Y,cmap='Set1',marker='.', lw=0)
             ax.view_init(a, b)
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
-            ax.set_zlabel('z')
-        #plt.gca().set_title('Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3), loc='left')
-        plt.subplot(3, 4, int(4*i/3) + 2).set_title('Componentes Principales Y{},Y{},Y{}'.format(i+1, i + 2, i + 3), x=1.2, y=1.3, fontsize=14)
-    #plt.suptitle(title + ': '+ 'Componentes Y{},Y{},Y{}'.format(i+1,i+2,i+3))
-    plt.suptitle(title, fontsize=16)
-    plt.subplots_adjust(hspace=.6, wspace=.6)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_zticks([])
+        plt.subplot(3, 4, int(4*i/3) + 2).set_title('Componentes Principales Y{},Y{},Y{}'.format(i+1, i + 2, i + 3), x=1.2, y=1.1, fontsize=12)
+    plt.suptitle(title, fontsize=14)
+    #plt.suptitle('Oja t=10000 lr=0.00001', fontsize=14)
+    plt.subplots_adjust(hspace=.2, wspace=.01, top=.9)
     plt.show()
 
 
