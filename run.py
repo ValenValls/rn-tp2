@@ -154,7 +154,7 @@ if __name__ == '__main__':
                 r = best_model['r']
                 m = best_model['m']
                 e = best_model['e']
-                path = f'SOM_lr_{lr}_r_{r}_m_{m}_val_{val}_e_{e}'
+                path = f'SOM_BEST_TRAINED'
                 if not os.path.exists(path):
                     os.mkdir(path)
                 modelo.change_m_and_reset(m)
