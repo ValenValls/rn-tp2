@@ -22,7 +22,7 @@ class Hebbiano:
         self.n = N
         self.reglas = reglas
 
-    def import_model(self, filename, graph=False):
+    def export_model(self, filename, graph=False):
         # El formato del archivo seria
         # N = Cantidad de nodos entrada
         # M = Cantidad de nodos salida
@@ -34,7 +34,7 @@ class Hebbiano:
             file.write(f"{self.reglas}\n")
             np.savetxt(file, self.weights, fmt='%.6f')
 
-    def export_model(self, filename, graph=False):
+    def import_model(self, filename, graph=False):
         with open(filename, 'r', encoding='utf-8') as file:
             file_rows = file.readlines()
         self.n = int(file_rows[0])
