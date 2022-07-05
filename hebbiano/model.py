@@ -40,8 +40,7 @@ class Hebbiano:
     def ortogonalidad(self):
         return np.sum(np.abs(np.dot( self.weights.T, self.weights) - np.identity(self.m) ))/2
 
-    #Entrenamiento del modelo con el algoritmo de Oja
-    
+    #Entrenamiento del modelo con el algoritmo de Oja    
     def trainOja(self,X,error_limit=0.01, limit=100, lr=0.0001):
         t = 1
         X_train = X.copy()
@@ -57,8 +56,6 @@ class Hebbiano:
             t += 1
 
     #Entrenamiento del modelo con el algoritmo de Sanger
-
-
     def trainSanger(self,X,error_limit=0.01, limit=100, lr=0.0001):
         t = 1
         X_train = X.copy()

@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 class SOM:
 
     def __init__(self, n=None, m=None):
-        ## n es la cantidad de palabras, m el tamaño de la matriz de pesos de cada celula.
+        ## n es la cantidad de palabras, mxm el tamaño de la matriz de pesos de cada neurona.
         rand = np.random.RandomState(0)
         self.n = n
         self.m = m

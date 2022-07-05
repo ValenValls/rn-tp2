@@ -11,9 +11,8 @@ def get_data(archivo_data):
 
     return X, Y
 
-# Si se le da X,Y obtenidos de get_data, separa aleatoriamente en xtrain,ytrain y xvalidation,yvalidation
-#   Dejo la version de separacion aleatoria que puede perder la uniformidad que tenía el dataset
-#   Podría llegar a servir para ver la diferencia cuando se entrena con y sin uniformidad de datos?
+# Si se le da X,Y obtenidos de get_data, separa aleatoriamente en xtrain, ytrain y xvalidation, yvalidation
+#   No mantiene uniformidad de categorías
 def random_separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
     total_regs = X.shape[0] if total_regs == 0 else total_regs
     X = X[:total_regs, : ]
@@ -31,8 +30,8 @@ def random_separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
     Y_validation = Y[val]
     return X_train, Y_train, X_validation, Y_validation
 
-#Haciendo esto note que no hay exactamente 100 instancias de cada categoria en el dataset, esta separacion igualmente...
-#   mantiene misma proporcion que el dataset original
+#Si se le da X,Y obtenidos de get_data, separa aleatoriamente en xtrain, ytrain y xvalidation, yvalidation
+#   Mantiene uniformidad de categorías
 def proportional_separate_train_validation(X,Y,validation_size=0.1, total_regs=0):
     total_regs = X.shape[0] if total_regs == 0 else total_regs
     X = X[:total_regs, : ]
@@ -57,9 +56,7 @@ def proportional_separate_train_validation(X,Y,validation_size=0.1, total_regs=0
     Y_validation = Y[validate_by_cat]
     return X_train, Y_train, X_validation, Y_validation
 
-#Recibe el dataset a separar, Y la categorias
-#Se puede utilizar con X_validation, Y_validation luego de
-#Mantener el Y no es necesario, ya que estan separados
+#Recibe X el dataset a separar segun las Y categorias, devuelve dataset separado
 def separate_attributes_by_category(X,Y):
     indexes_by_cat = [[],[],[],[],[],[],[],[],[]]
     for idy in range(0,len(Y)):
@@ -77,6 +74,7 @@ def normalize(X):
     std = X.std(0) 
     X = (X - mean) / np.square(std)
     return X, mean, std
+
 #Agrego title para diferenciar los graficos
 def plot3D(X,Y,title):
     Y = Y.reshape((-1, 1))
@@ -102,14 +100,6 @@ def plot3D(X,Y,title):
     plt.suptitle(title, fontsize=14)
     plt.subplots_adjust(hspace=.2, wspace=.01, top=.9)
     plt.show()
-
-
-
-
-
-
-
-
 
 def plotSOMColorMap(categorieMatrix):
     plt.imshow(categorieMatrix, cmap='Pastel1')

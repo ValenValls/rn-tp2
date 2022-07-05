@@ -53,21 +53,16 @@ if __name__ == '__main__':
     #Si no recibo argumentos se generara un modelo vacio, que se completara cuando importe el modelo.
     #Si voy a entrenar de cero si o si debe recibir argumentos.
     modelo = MODELO[run.model](*run.args) if run.args else MODELO[run.model]()
-
     regla_modelo = ''
-
-
 
     if run.modelo_file:
         # Si se indica un archivo de modelo por entrada, se asume que se quiere levantar ese modelo para predecir el data_file
         modelo.import_model(run.modelo_file, run.graph)
         if run.model == 'hebb':
-
             predicted = modelo.predict(X)
             regla_modelo = modelo.reglas + '_' #Al crear el modelo me guarda la regla en modelo_reglas
             plot3D(predicted, Y, regla_modelo)
-        else:
-            #TODO hay que terminar el som para que esto pueda hacer algo
+        else:                        
             if run.graph:
                 modelo.categorize_and_map(X, Y, title='Categorizacion sobre modelo pre-entrenado', fn='salida_preentrenado.png')
             predicted = modelo.categorize(X)
@@ -79,17 +74,14 @@ if __name__ == '__main__':
             for i, (t, e) in enumerate(zip(tot, ok)):
                 if t > 0:
                     print(f'categoria {i}: {e / t}')
-            # assert True == False, 'Falta implementar esto'
+            
     else:
          # Si no tengo un modelo tengo que entrenar de cero segun el ejercicio.
-
-
-        if run.model == 'hebb':
-
+        if run.model == 'hebb':            
             modelo.train(X)
             predicted = modelo.predict(X)
             regla_modelo = run.args[2].upper() + '_'
-            plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla
+            plot3D(predicted, Y, regla_modelo) # el tercer dato es el tipo de regla            
         else:
             header = 'learning_rate,radio,m,validation,epochs,training_acc,validation_acc,sin_cat,cat_1,cat_2,cat_3,cat_4,cat_5,cat_6,cat_7,cat_8,cat_9\n'
             with open('results.csv', '+w', encoding='utf-8') as file_acc:
