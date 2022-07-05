@@ -63,7 +63,6 @@ class Hebbiano:
             #  a las 2453 iteraciones. Aumentando el learning rate da nans... esto se me hace raro puesto
 
             learning_rate = lr/t
-            #learning_rate = 0.0001
             np.random.shuffle(X_train)
             for x in X_train:
                 x = x.reshape((1, -1))
@@ -71,8 +70,6 @@ class Hebbiano:
                 Z = np.dot( Y, self.weights.T)
                 dW = np.outer( x-Z, Y)
                 self.weights += learning_rate * dW
-            #print(t)
-            #print(self.ortogonalidad())
             t += 1
 
     #Entrenamiento del modelo con el algoritmo de Sanger
@@ -83,7 +80,6 @@ class Hebbiano:
         X_train = X.copy()
         while t<limit and (self.ortogonalidad() > error_limit):
             learning_rate = lr/t
-            #learning_rate = 0.0001
             np.random.shuffle(X_train)
             for x in X_train:
                 x = x.reshape((1, -1))
@@ -92,11 +88,9 @@ class Hebbiano:
                 Z = np.dot( self.weights, Y.T*D)
                 dW = (x.T - Z) * Y
                 self.weights += learning_rate * dW
-            #print(t)
-            #print(self.ortogonalidad())
             t += 1
 
-    def train(self, X, error_limit=0.01, limit=100):
+    def train(self, X, error_limit=0.01, limit=500):
         if self.reglas == 'oja':
             self.trainOja(X, error_limit, limit)
         else:

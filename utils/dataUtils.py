@@ -103,7 +103,6 @@ def plot3D(X,Y,title):
             ax.set_zticks([])
         plt.subplot(3, 4, int(4*i/3) + 2).set_title('Componentes Principales Y{},Y{},Y{}'.format(i+1, i + 2, i + 3), x=1.2, y=1.1, fontsize=12)
     plt.suptitle(title, fontsize=14)
-    #plt.suptitle('Oja t=10000 lr=0.00001', fontsize=14)
     plt.subplots_adjust(hspace=.2, wspace=.01, top=.9)
     plt.show()
 
