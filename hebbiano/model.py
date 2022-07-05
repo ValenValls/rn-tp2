@@ -7,17 +7,8 @@ class Hebbiano:
 
 
     def __init__(self, N=None,M=None, reglas=None):
-        #if N and M :
-            #Mejor
-            #self.weights = np.random.normal( -0.1, 0.1, (N,M))
-        #self.weights = np.random.uniform(-0.1, 0.1, (N, M))
-        self.weights = np.random.normal(0, 0.0001, (N, M))
-        #self.weights = np.random.randn(N, M) * 0.0001
-        #self.weights = np.random.normal(0, 0.001, (N, M))
-        #self.weights =np.random.normal(scale=0.25, size=(N, M))
-        #todo no se si aporta en algo pero dejo por aca. Lei en general que los pesos se inicializaban con zero...
-        # esto no funciona si lo inicializo con cero. Pero podriamos con numeros muy chicos como hicimos para
-        # el perceptron self.weights = np.random.randn(N,M) * 0.0001 No se si cambia significativamente.
+        if N and M :
+            self.weights = np.random.normal(0, 0.0001, (N, M))
         self.m = M
         self.n = N
         self.reglas = reglas
@@ -55,13 +46,6 @@ class Hebbiano:
         t = 1
         X_train = X.copy()
         while t < limit and (self.ortogonalidad() > error_limit):
-            # todo Poniendo pesos bajitos y limite 100 no corta por el error sino por el limite.
-            #  Subiendo el limite, corta a las 250 vueltas aprox por el error.
-            #  En una tercera prueba, bajo el limite de error a 0.001 corta a los 1000 con 0.002460829456370829 de
-            #  error. Honestamente en ningun caso veo cambios notorios en los graficos.
-            #  Aumentando el limite a 5000 corta con error 0.0009998011326659293
-            #  a las 2453 iteraciones. Aumentando el learning rate da nans... esto se me hace raro puesto
-
             learning_rate = lr/t
             np.random.shuffle(X_train)
             for x in X_train:

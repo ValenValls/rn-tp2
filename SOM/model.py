@@ -204,7 +204,6 @@ class SOM:
 
     def categorize_and_map(self, X, Y, fn='validation.png', title='Clasificación del set de validación', path=''):
         mat = self.map_per_cat(X, Y)
-        # fig = plt.figure(2)
         fig, ax = plt.subplots(
             nrows=3, ncols=3, figsize=(15, 20),
             subplot_kw=dict(xticks=[], yticks=[]))
