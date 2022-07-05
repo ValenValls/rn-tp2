@@ -86,6 +86,13 @@ Si se corre con `-s` se guarda ademas un archivo con el mejor modelo obtenido. E
 
 ### SOM
 Al correr SOM por defecto se guarda un archivo `results.csv` con los valores de acurracy obtenidos para cada combinacion de hyperparametros corrida.
+Las combinaciones están definidas como un arreglo de diccionarios:
+
+```python
+hyper_params = [{'lr': 0.01, 'r': 1, 'm': 3, 'val':0.1, 'e':8}...]
+```
+
+Para probar otra combinación se debe modificar este arreglo en el archivo `run.py`
 Si se corre con `-s` se guarda ademas un archivo con el mejor modelo obtenido. El formato de este archivo consiste en:
 
 - Una primera linea con la cantidad de palabras N 
@@ -93,6 +100,6 @@ Si se corre con `-s` se guarda ademas un archivo con el mejor modelo obtenido. E
 - Las lineas siguientes corresponden al tensor de pesos, guardado como M veces M lineas de N (M, M, N)
 - Finalmente se guarda la matriz de categorias de MxM para poder indicar la categoria de nuevos casos 
 
-Si se corre con `g` se guardan graficos de la evolucion del entrenamiento y de las categorias obtenidas para conjuntos de entrenamiento y validacion en un mapeo sobre la grilla.
+Si se corre con `-g` se guardan graficos de la evolucion del entrenamiento y de las categorias obtenidas para conjuntos de entrenamiento y validacion en un mapeo sobre la grilla.
 
-
+Si se corre un modelo preentrenado con el argumento `-s` se guarda la salida correspondiente a una lista de categorías por documento de entrada. Por defecto el archivo se llama `predicciones.txt`
